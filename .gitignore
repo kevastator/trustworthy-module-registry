@@ -1,0 +1,10 @@
+# Files to be ignored by git
+
+*.env
+*.log
+logs/
+node_modules/
+package-lock.json
+repo-licenses/
+repo-readmes/
+coverage/

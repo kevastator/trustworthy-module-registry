@@ -1,0 +1,23 @@
+{
+    "name": "trustworthy-module-cli",
+    "version": "1.0.0",
+    "description": "CLI for Trustworthy Module Re-Use",
+    "main": "build/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node build/index.js",
+        "test": "jest 2>&1 | tee temp.log"
+    },
+    "author": "Calvin Madsen, Nathan Bitner, Tonmoy Rakshit, Zinat Adeleye, Osan Omayuku",
+    "license": "LGPL-2.1",
+    "dependencies": {
+        "@types/jest": "^29.5.13",
+        "@types/node": "^22.5.4",
+        "axios": "^1.7.7",
+        "dotenv": "^16.4.5",
+        "isomorphic-git": "^1.27.1",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.2.5",
+        "typescript": "^5.5.4"
+    }
+}
