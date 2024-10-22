@@ -21,6 +21,12 @@ import * as git from 'isomorphic-git';
 const { promisify } = require('util');
 const { exec } = require('child_process');
 import dotenv from 'dotenv';
+import { Handler } from 'aws-lambda';
+
+export const handler: Handler = async (event, context) => {
+  console.log('EVENT: \n' + JSON.stringify(event, null, 2));
+  return context.logStreamName;
+};
 
 dotenv.config();
 

@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FractionalDependency = exports.PullRequest = exports.License = exports.ResponsiveMaintainer = exports.BusFactor = exports.Correctness = exports.RampUp = exports.Metric = exports.URLHandler = void 0;
+exports.FractionalDependency = exports.PullRequest = exports.License = exports.ResponsiveMaintainer = exports.BusFactor = exports.Correctness = exports.RampUp = exports.Metric = exports.URLHandler = exports.handler = void 0;
 exports.isValidUrl = isValidUrl;
 exports.processURLs = processURLs;
 exports.getGithubRepoFromNpm = getGithubRepoFromNpm;
@@ -53,6 +53,11 @@ const git = __importStar(require("isomorphic-git"));
 const { promisify } = require('util');
 const { exec } = require('child_process');
 const dotenv_1 = __importDefault(require("dotenv"));
+const handler = async (event, context) => {
+    console.log('EVENT: \n' + JSON.stringify(event, null, 2));
+    return context.logStreamName;
+};
+exports.handler = handler;
 dotenv_1.default.config();
 // Check for required environment variables
 if (!process.env.LOG_FILE) {
