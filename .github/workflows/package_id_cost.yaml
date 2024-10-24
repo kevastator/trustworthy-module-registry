@@ -1,9 +1,9 @@
-name: Deploy Package By Name to Lambda
+name: Deploy Package Id Cost to Lambda
 
 on:
   push:
     paths:
-      - "build/package_byName.js"
+      - "build/package_id_cost.js"
     branches: [aws-testing]
 
 jobs:
@@ -23,12 +23,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Zip Send
-        run: cp build/package_byName.js build/index.js && cd build && zip send.zip index.js
+        run: cp build/package_id_cost.js build/index.js && cd build && zip send.zip index.js
       - name: Deploy
         uses: appleboy/lambda-action@v0.2.0
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
-          function_name: package_byName
+          function_name: package_id_cost
           zip_file: build/send.zip
