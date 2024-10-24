@@ -11,8 +11,6 @@
  * The tool can process multiple URLs, resolve npm packages to GitHub repositories,
  * and output the results in NDJSON format.
  */
-
-//CD TEST 7
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -41,6 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FractionalDependency = exports.PullRequest = exports.License = exports.ResponsiveMaintainer = exports.BusFactor = exports.Correctness = exports.RampUp = exports.Metric = exports.URLHandler = exports.handler = void 0;
+exports.processURL = processURL;
 exports.isValidUrl = isValidUrl;
 exports.processURLs = processURLs;
 exports.getGithubRepoFromNpm = getGithubRepoFromNpm;
@@ -56,8 +55,7 @@ const { promisify } = require('util');
 const { exec } = require('child_process');
 const dotenv_1 = __importDefault(require("dotenv"));
 const handler = async (event, context) => {
-    console.log('EVENT: \n' + JSON.stringify(event, null, 2));
-    return context.logStreamName;
+    return processURL("https://www.npmjs.com/package/socket.io");
 };
 exports.handler = handler;
 dotenv_1.default.config();
@@ -963,6 +961,16 @@ function isValidUrl(url) {
     catch (error) {
         return false;
     }
+}
+async function processURL(url) {
+    if (!isValidUrl(url)) {
+        await log(`Invalid URL: ${url}`, 2);
+        return "ERROR";
+    }
+    await log(`Processing URL: ${url}`, 1);
+    const handler = new URLHandler(url);
+    const result = await handler.processURL();
+    return result;
 }
 /**
  * Processes a file containing URLs

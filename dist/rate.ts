@@ -24,8 +24,8 @@ import dotenv from 'dotenv';
 import { Handler } from 'aws-lambda';
 
 export const handler: Handler = async (event, context) => {
-  console.log('EVENT: \n' + JSON.stringify(event, null, 2));
-  return context.logStreamName;
+
+  return processURL("https://www.npmjs.com/package/socket.io");
 };
 
 dotenv.config();
@@ -1086,6 +1086,21 @@ function isValidUrl(url: string): boolean {
   } catch (error) {
     return false;
   }
+}
+
+export async function processURL(url: string): Promise<string> {
+  if (!isValidUrl(url)) {
+    await log(`Invalid URL: ${url}`, 2);
+
+    return "ERROR";
+  }
+
+  await log(`Processing URL: ${url}`, 1);
+  const handler = new URLHandler(url);
+
+  const result = await handler.processURL();
+
+  return result;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { getGithubRepoFromNpm, log, isValidUrl, RampUp, Correctness, BusFactor, ResponsiveMaintainer, License } from '../index';
+import { getGithubRepoFromNpm, log, isValidUrl, RampUp, Correctness, BusFactor, ResponsiveMaintainer, License } from '../rate';
 
 const testURL = 'https://github.com/MadSons/ECE46100-Team';
 

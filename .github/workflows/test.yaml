@@ -1,9 +1,9 @@
-name: Deploy Index to Lambda
+name: Deploy Rate to Lambda
 
 on:
   push:
     paths:
-      - "build/index.js"
+      - "build/rate.js"
     branches: [aws-testing]
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Zip Send
-        run: cd build && zip send.zip index.js
+        run: cp build/rate.js build/index.mjs && cd build && zip send.zip index.mjs
       - name: Deploy
         uses: appleboy/lambda-action@v0.2.0
         with:
