@@ -1,0 +1,8 @@
+mkdir nodejs
+mkdir nodejs/node_modules
+cp -r node_modules/* nodejs/node_modules
+cp package.json nodejs
+cp package-lock.json nodejs
+cp .env nodejs
+zip layer.zip -r nodejs
+rm -r nodejs
