@@ -10,7 +10,7 @@
  * The tool can process multiple URLs, resolve npm packages to GitHub repositories,
  * and output the results in NDJSON format.
  * 
- * CI TEST 3
+ * CI TEST 4
  */
 
 import { promises as fs, existsSync, mkdirSync, readFileSync, unlink } from 'fs';
