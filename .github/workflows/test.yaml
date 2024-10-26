@@ -5,6 +5,8 @@ on:
     paths:
       - "build/rate.js"
     branches: [aws-testing]
+  pull_request:
+    branches: [ "main" ]
 
 env:
   GITHUB_TOKEN: ${{secrets.TEST_GIT_TOKEN}}
