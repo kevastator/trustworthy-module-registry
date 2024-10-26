@@ -11,7 +11,7 @@
  * The tool can process multiple URLs, resolve npm packages to GitHub repositories,
  * and output the results in NDJSON format.
  *
- * CI TEST 4
+ * CI TEST 5
  */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;

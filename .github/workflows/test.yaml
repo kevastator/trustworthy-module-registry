@@ -6,6 +6,11 @@ on:
       - "build/rate.js"
     branches: [aws-testing]
 
+env:
+  GITHUB_TOKEN: ${{secrets.TEST_GIT_TOKEN}}
+  LOG_LEVEL: 2
+  LOG_FILE: "./logs/my_log.txt"
+
 jobs:
 
   deploy_zip:
