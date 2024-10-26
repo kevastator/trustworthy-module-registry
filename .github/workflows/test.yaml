@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Setup Node Env
-        run: npm ci && npm run build --if-present && npm test
+        run: npm install && npm run build --if-present && npm test
       - name: Zip Send
         run: cp build/rate.js build/index.js && cd build && zip send.zip index.js
       - name: Deploy
