@@ -1,4 +1,4 @@
-import { getGithubRepoFromNpm, log, isValidUrl, RampUp, Correctness, BusFactor, ResponsiveMaintainer, License } from '../rate';
+import { getGithubRepoFromNpm, log, isValidUrl, RampUp, Correctness, BusFactor, ResponsiveMaintainer, License, FractionalDependency, PullRequest } from '../rate';
 
 const testURL = 'https://github.com/MadSons/ECE46100-Team';
 
@@ -148,7 +148,7 @@ describe('Fractional Dependency', () => {
   
   test('should calculate the Fractional Dependency for a Repo with many dependencies', async () => {
     const fractionalDependency = new FractionalDependency('https://github.com/lodash/lodash');
-    const result = await FractionalDependency.calculate();
+    const result = await fractionalDependency.calculate();
     expect(result.score).toBeGreaterThanOrEqual(0);
     expect(result.score).toBeLessThanOrEqual(1);
     expect(result.latency).toBeGreaterThanOrEqual(0);
