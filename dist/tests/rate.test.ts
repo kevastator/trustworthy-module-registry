@@ -129,6 +129,60 @@ describe('License', () => {
 
 });
 
+// New
+describe('Fractional Dependency', () => {
+  test('should calculate the Fractional Dependency for a Repo with a few dependencies', async () => {
+    const fractionalDependency = new FractionalDependency(testURL);
+    const result = await fractionalDependency.calculate();
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(1);
+    expect(result.latency).toBeGreaterThanOrEqual(0);
+  });
+
+  test('should calculate the Fractional Dependency for a Repo with no dependencies', async () => {
+    const fractionalDependency = new FractionalDependency('https://www.npmjs.com/package/unlicensed');
+    const result = await fractionalDependency.calculate();
+    expect(result.score).toBe(1);
+    expect(result.latency).toBeGreaterThanOrEqual(0);
+  });
+  
+  test('should calculate the Fractional Dependency for a Repo with many dependencies', async () => {
+    const fractionalDependency = new FractionalDependency('https://github.com/lodash/lodash');
+    const result = await FractionalDependency.calculate();
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(1);
+    expect(result.latency).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('Pull Requests', () => {
+  test('should calculate the fraction of code produced through Pull Requests for a small repo', async () => {
+    const pullRequest = new PullRequest(testURL);
+    const result = await pullRequest.calculate();
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(1);
+    expect(result.latency).toBeGreaterThanOrEqual(0);
+  });
+
+  test('should calculate the Pull Requests for a repository with 1 line of code', async () => {
+    const pullRequest = new PullRequest('https://www.npmjs.com/package/unlicensed');
+    const result = await pullRequest.calculate();
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(1);
+    expect(result.latency).toBeGreaterThanOrEqual(0);
+  });
+
+  test('should calculate the Pull Requests for a large repository', async () => {
+    const pullRequest = new PullRequest('https://www.npmjs.com/package/lodash');
+    const result = await pullRequest.calculate();
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(1);
+    expect(result.latency).toBeGreaterThanOrEqual(0);
+  });
+});
+
+  // End of New
+
 describe('getGithubRepoFromNpm', () => {
   test('should return GitHub URL for a known npm package', async () => {
     const result = await getGithubRepoFromNpm('express');
