@@ -10,18 +10,19 @@ function getTempDir() {
 
 // Function to remove unnecessary files from the directory
 export function removeUnnecessaryFiles(dir: string): void {
-    const patternsToRemove = ['README.md', '*.test.js', 'tests'];
-    
+    const patternsToRemove = ['README.md', /\.test\.js$/, 'tests']; // Changed *.test.js to regex
+
     patternsToRemove.forEach((pattern) => {
         const files = fs.readdirSync(dir);
         files.forEach(file => {
-            if (file.match(pattern)) {
+            if (typeof pattern === 'string' ? file === pattern : file.match(pattern)) { // Check if pattern is string
                 fs.removeSync(path.join(dir, file));
             }
         });
     });
     console.log('Unnecessary files removed.');
 }
+
 
 // Minification and tree-shaking
 export function performTreeShakingAndMinification(dir: string): void {
@@ -31,7 +32,7 @@ export function performTreeShakingAndMinification(dir: string): void {
 
         module.exports = {
             mode: 'production',
-            entry: './src/index.ts',
+            entry: './dist/rate.ts',
             output: {
                 filename: 'bundle.js',
                 path: path.resolve('${dir}', 'dist')
