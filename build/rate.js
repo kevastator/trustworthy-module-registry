@@ -57,7 +57,8 @@ const { promisify } = require('util');
 const { exec } = require('child_process');
 const dotenv_1 = __importDefault(require("dotenv"));
 const handler = async (event, context) => {
-    return processURL("https://www.npmjs.com/package/socket.io");
+    const test = await processURL("https://www.npmjs.com/package/socket.io");
+    return test;
 };
 exports.handler = handler;
 dotenv_1.default.config();
@@ -86,7 +87,7 @@ async function log(message, level = 1) {
             .catch(() => false);
         if (!logFileExists) {
             const logDir = path.dirname(LOG_FILE);
-            await fs_1.promises.mkdir("/tmp/" + logDir, { recursive: true });
+            await fs_1.promises.mkdir(logDir, { recursive: true });
         }
         // Format the date
         const now = new Date();
@@ -101,7 +102,7 @@ async function log(message, level = 1) {
         }).replace(/(\d+)\/(\d+)\/(\d+),/, '$3-$1-$2');
         // Append the message to the log file
         const logMessage = `${formattedDate} - ${message}\n`;
-        await fs_1.promises.appendFile("/tmp/" + LOG_FILE, logMessage);
+        await fs_1.promises.appendFile(LOG_FILE, logMessage);
     }
 }
 /**
@@ -1029,6 +1030,11 @@ async function runTests() {
  */
 async function main() {
     const command = process.argv[2];
+    /*
+    const test = await processURL("https://www.npmjs.com/package/socket.io");
+  
+    console.log(test);
+    */
     // check if GITHUB_TOKEN is valid
     axios_1.default.get('https://api.github.com', {
         headers: {

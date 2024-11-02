@@ -27,7 +27,9 @@ import { Handler } from 'aws-lambda';
 
 export const handler: Handler = async (event, context) => {
 
-  return processURL("https://www.npmjs.com/package/socket.io");
+  const test = await processURL("https://www.npmjs.com/package/socket.io");
+
+  return test;
 };
 
 dotenv.config();
@@ -61,7 +63,7 @@ async function log(message: string, level: number = 1): Promise<void> {
 
     if (!logFileExists) {
       const logDir = path.dirname(LOG_FILE);
-      await fs.mkdir("/tmp/" + logDir, { recursive: true });
+      await fs.mkdir(logDir, { recursive: true });
     }
 
     // Format the date
@@ -78,7 +80,7 @@ async function log(message: string, level: number = 1): Promise<void> {
 
     // Append the message to the log file
     const logMessage = `${formattedDate} - ${message}\n`;
-    await fs.appendFile("/tmp/" + LOG_FILE, logMessage);
+    await fs.appendFile(LOG_FILE, logMessage);
   }
 }
 
@@ -1177,6 +1179,12 @@ export {URLHandler, Metric, RampUp, Correctness, BusFactor, ResponsiveMaintainer
  */
 async function main(): Promise<void> {
   const command = process.argv[2];
+
+  /*
+  const test = await processURL("https://www.npmjs.com/package/socket.io");
+
+  console.log(test);
+  */
 
   // check if GITHUB_TOKEN is valid
   axios.get('https://api.github.com', {
