@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "build/package_byRegEx.js"
-    branches: [aws-testing]
 
 jobs:
 

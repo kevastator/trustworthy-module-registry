@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "build/reset.js"
-    branches: [aws-testing]
 
 jobs:
 

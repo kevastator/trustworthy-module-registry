@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "build/package_id_put.js"
-    branches: [aws-testing]
 
 jobs:
 
