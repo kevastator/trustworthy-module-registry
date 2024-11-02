@@ -26,7 +26,7 @@ import dotenv from 'dotenv';
 import { Handler } from 'aws-lambda';
 
 export const handler: Handler = async (event, context) => {
-  const body = JSON.parse(event.body || '{}');
+  const body = JSON.parse(event || '{}');
 
   const url = body.items[0];
 

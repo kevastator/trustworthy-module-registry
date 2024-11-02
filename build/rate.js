@@ -57,7 +57,7 @@ const { promisify } = require('util');
 const { exec } = require('child_process');
 const dotenv_1 = __importDefault(require("dotenv"));
 const handler = async (event, context) => {
-    const body = JSON.parse(event.body || '{}');
+    const body = JSON.parse(event || '{}');
     const url = body.items[0];
     const test = await processURL(url);
     return {
