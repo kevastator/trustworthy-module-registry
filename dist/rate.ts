@@ -27,6 +27,8 @@ import { Handler } from 'aws-lambda';
 
 export const handler: Handler = async (event, context) => {
 
+  console.log("TEST")
+
   const test = await processURL("https://www.npmjs.com/package/socket.io");
 
   return test;
