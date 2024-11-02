@@ -61,7 +61,7 @@ const handler = async (event, context) => {
     const test = await processURL(url);
     return {
         statusCode: 200,
-        body: JSON.stringify(test)
+        body: test
     };
 };
 exports.handler = handler;
