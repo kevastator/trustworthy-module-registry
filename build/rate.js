@@ -86,7 +86,7 @@ async function log(message, level = 1) {
             .catch(() => false);
         if (!logFileExists) {
             const logDir = path.dirname(LOG_FILE);
-            await fs_1.promises.mkdir(logDir, { recursive: true });
+            await fs_1.promises.mkdir("/tmp/" + logDir, { recursive: true });
         }
         // Format the date
         const now = new Date();
@@ -101,7 +101,7 @@ async function log(message, level = 1) {
         }).replace(/(\d+)\/(\d+)\/(\d+),/, '$3-$1-$2');
         // Append the message to the log file
         const logMessage = `${formattedDate} - ${message}\n`;
-        await fs_1.promises.appendFile(LOG_FILE, logMessage);
+        await fs_1.promises.appendFile("/tmp/" + LOG_FILE, logMessage);
     }
 }
 /**

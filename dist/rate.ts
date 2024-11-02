@@ -61,7 +61,7 @@ async function log(message: string, level: number = 1): Promise<void> {
 
     if (!logFileExists) {
       const logDir = path.dirname(LOG_FILE);
-      await fs.mkdir(logDir, { recursive: true });
+      await fs.mkdir("/tmp/" + logDir, { recursive: true });
     }
 
     // Format the date
@@ -78,7 +78,7 @@ async function log(message: string, level: number = 1): Promise<void> {
 
     // Append the message to the log file
     const logMessage = `${formattedDate} - ${message}\n`;
-    await fs.appendFile(LOG_FILE, logMessage);
+    await fs.appendFile("/tmp/" + LOG_FILE, logMessage);
   }
 }
 
