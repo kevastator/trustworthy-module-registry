@@ -1,0 +1,34 @@
+name: Deploy Package Delete to Lambda
+
+on:
+  push:
+    paths:
+      - "build/package_id_del.js"
+    branches: [aws-testing]
+
+jobs:
+
+  deploy_zip:
+    name: deploy lambda function
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['20.x']
+        
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Zip Send
+        run: cp build/package_id_del.js build/index.js && cd build && zip send.zip index.js
+      - name: Deploy
+        uses: appleboy/lambda-action@v0.2.0
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: package_id_del
+          zip_file: build/send.zip

@@ -1,0 +1,8 @@
+https://github.com/cloudinary/cloudinary_npm
+https://www.npmjs.com/package/express
+https://github.com/nullivex/nodist
+https://github.com/lodash/lodash
+https://www.npmjs.com/package/browserify
+https://github.com/MadSons/ECE46100-Team
+https://www.npmjs.com/package/wat4hjs
+invalid url test
