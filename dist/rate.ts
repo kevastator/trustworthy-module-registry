@@ -26,9 +26,7 @@ import dotenv from 'dotenv';
 import { Handler } from 'aws-lambda';
 
 export const handler: Handler = async (event, context) => {
-  const body = JSON.parse(event || '{}');
-
-  const url = body.items[0];
+  const url = event.items[0];
 
   const test = await processURL(url);
 
@@ -1044,7 +1042,7 @@ class URLHandler {
       ...results
     };
 
-    return JSON.stringify(finalOutput);
+    return finalOutput;
   }
 } 
 

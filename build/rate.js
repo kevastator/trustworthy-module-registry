@@ -57,8 +57,7 @@ const { promisify } = require('util');
 const { exec } = require('child_process');
 const dotenv_1 = __importDefault(require("dotenv"));
 const handler = async (event, context) => {
-    const body = JSON.parse(event || '{}');
-    const url = body.items[0];
+    const url = event.items[0];
     const test = await processURL(url);
     return {
         statusCode: 200,
@@ -922,7 +921,7 @@ class URLHandler {
             NetScore_Latency: netScoreLatencyRounded,
             ...results
         };
-        return JSON.stringify(finalOutput);
+        return finalOutput;
     }
 }
 exports.URLHandler = URLHandler;
