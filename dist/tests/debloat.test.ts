@@ -2,7 +2,7 @@ import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import AdmZip from 'adm-zip';
-import { debloatPackage } from './debloat'; // Adjust the import based on your file structure
+import { debloatPackage } from '../debloat'; // Adjust the import based on your file structure
 
 // Mock fs-extra module
 jest.mock('fs-extra', () => ({
