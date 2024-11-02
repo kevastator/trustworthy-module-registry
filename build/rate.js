@@ -57,9 +57,13 @@ const { promisify } = require('util');
 const { exec } = require('child_process');
 const dotenv_1 = __importDefault(require("dotenv"));
 const handler = async (event, context) => {
-    console.log("TEST");
-    const test = await processURL("https://www.npmjs.com/package/socket.io");
-    return test;
+    const body = JSON.parse(event.body || '{}');
+    const url = body.items[0];
+    const test = await processURL(url);
+    return {
+        statusCode: 200,
+        body: JSON.stringify(test)
+    };
 };
 exports.handler = handler;
 dotenv_1.default.config();

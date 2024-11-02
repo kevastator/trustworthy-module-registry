@@ -26,12 +26,16 @@ import dotenv from 'dotenv';
 import { Handler } from 'aws-lambda';
 
 export const handler: Handler = async (event, context) => {
+  const body = JSON.parse(event.body || '{}');
 
-  console.log("TEST")
+  const url = body.items[0];
 
-  const test = await processURL("https://www.npmjs.com/package/socket.io");
+  const test = await processURL(url);
 
-  return test;
+  return {
+    statusCode: 200,
+    body: JSON.stringify(test)
+  };
 };
 
 dotenv.config();
