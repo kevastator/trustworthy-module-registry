@@ -14,7 +14,29 @@ const handler = async (event, context) => {
     if (Name == undefined || Version == undefined || !checkValidVersion(Version)) {
         return Err400;
     }
-    return "TODO";
+    // TODO S3 RETRIEVAL IMPLIMENTATION
+    // MOCK RETURN
+    const result = {
+        statusCode: 200,
+        body: [
+            {
+                Version: "1.2.3",
+                Name: "Underscore",
+                ID: "17621"
+            },
+            {
+                Version: "1.2.3",
+                Name: "Lodash",
+                ID: "91273"
+            },
+            {
+                Version: "1.2.3",
+                Name: "React",
+                ID: "71283"
+            }
+        ]
+    };
+    return result;
 };
 exports.handler = handler;
 function checkValidVersion(versionString) {
@@ -22,11 +44,11 @@ function checkValidVersion(versionString) {
     const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
     return regex && !isRangeWithCaretOrTilde;
 }
-console.log(checkValidVersion("12.122.1"));
-console.log(checkValidVersion("~3.4.11"));
-console.log(checkValidVersion("^7.190.21"));
-console.log(checkValidVersion("8.5.6-7.8.4"));
-console.log(checkValidVersion("a8.5.6-7.8.4"));
-console.log(checkValidVersion("^~8.5.6-7.8.4"));
-console.log(checkValidVersion("^8.5.6-7.8.4"));
-console.log(checkValidVersion("12.122.1.1"));
+// console.log(checkValidVersion("12.122.1"));
+// console.log(checkValidVersion("~3.4.11"));
+// console.log(checkValidVersion("^7.190.21"));
+// console.log(checkValidVersion("8.5.6-7.8.4"));
+// console.log(checkValidVersion("a8.5.6-7.8.4"));
+// console.log(checkValidVersion("^~8.5.6-7.8.4"));
+// console.log(checkValidVersion("^8.5.6-7.8.4"));
+// console.log(checkValidVersion("12.122.1.1"));

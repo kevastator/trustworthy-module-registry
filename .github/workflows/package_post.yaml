@@ -5,7 +5,7 @@ on:
     paths:
       - "build/package_post.js"
       - "build/rate.js"
-      - build/debloat.js"
+      - "build/debloat.js"
 
 jobs:
 
