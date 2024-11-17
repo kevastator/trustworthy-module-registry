@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - "build/package_post.js"
+      - "build/rate.js"
+      - build/debloat.js"
 
 jobs:
 
@@ -22,7 +24,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Zip Send
-        run: cp build/package_post.js build/index.js && cd build && zip send.zip index.js
+        run: cp build/package_post.js build/index.js && cd build && echo "${{ secrets.ENV_FILE }}" > .env && zip send.zip index.js rate.js debloat.js .env
       - name: Deploy
         uses: appleboy/lambda-action@v0.2.0
         with:

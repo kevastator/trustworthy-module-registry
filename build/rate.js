@@ -41,11 +41,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FractionalDependency = exports.PullRequest = exports.License = exports.ResponsiveMaintainer = exports.BusFactor = exports.Correctness = exports.RampUp = exports.Metric = exports.URLHandler = exports.handler = void 0;
+exports.resolveNpmToGithub = resolveNpmToGithub;
 exports.processURL = processURL;
 exports.isValidUrl = isValidUrl;
 exports.processURLs = processURLs;
 exports.getGithubRepoFromNpm = getGithubRepoFromNpm;
 exports.log = log;
+exports.cloneRepo = cloneRepo;
 const fs_1 = require("fs");
 const worker_threads_1 = require("worker_threads");
 const child_process_1 = require("child_process");
@@ -969,11 +971,28 @@ function isValidUrl(url) {
         return false;
     }
 }
-async function processURL(url) {
-    if (!isValidUrl(url)) {
-        await log(`Invalid URL: ${url}`, 2);
-        return "ERROR";
+async function resolveNpmToGithub(url) {
+    if (url.includes("npmjs.com")) {
+        const packageName = url.split('/').pop();
+        if (!packageName) {
+            return url;
+        }
+        const githubRepo = await getGithubRepoFromNpm(packageName);
+        if (githubRepo) {
+            await log(`Found GitHub repository for package ${packageName}: ${githubRepo}`, 1);
+            return githubRepo;
+        }
+        else {
+            return url;
+        }
     }
+    return url;
+}
+async function processURL(url) {
+    // if (!isValidUrl(url)) {
+    //   await log(`Invalid URL: ${url}`, 2);
+    //   return "ERROR";
+    // }
     await log(`Processing URL: ${url}`, 1);
     const handler = new URLHandler(url);
     const result = await handler.processURL();
@@ -1028,6 +1047,26 @@ async function runTests() {
         console.error('Error running tests:', error);
         await log(`Error running tests: ${error}`, 2);
     }
+}
+async function cloneRepo(url, dir) {
+    await git.clone({
+        fs: fs_1.promises,
+        http,
+        dir,
+        url: url,
+        singleBranch: true,
+        depth: 1,
+        noCheckout: true,
+    });
+    console.log("TEST");
+    // Checkout only the README file
+    await git.checkout({
+        fs: fs_1.promises,
+        dir,
+        ref: 'HEAD',
+        filepaths: ['README.md'],
+        force: true,
+    });
 }
 /**
  * Main function that handles command-line arguments and executes the appropriate action

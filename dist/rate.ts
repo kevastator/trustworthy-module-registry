@@ -996,7 +996,7 @@ class URLHandler {
    * Process the metrics in parallel
    * @returns A Promise resolving to a JSON string containing all metric scores and latencies
    */
-  async processURL(): Promise<string> {
+  async processURL(): Promise<object> {
     const results: any = {};
     let weightedScoreSum = 0;
     let totalWeight = 0;
@@ -1096,13 +1096,31 @@ function isValidUrl(url: string): boolean {
   }
 }
 
-export async function processURL(url: string): Promise<string> {
-  if (!isValidUrl(url)) {
-    await log(`Invalid URL: ${url}`, 2);
+export async function resolveNpmToGithub(url: string): Promise<string> {
+  if (url.includes("npmjs.com")) {
+    const packageName = url.split('/').pop();
+    if (!packageName) {
+      return url;
+    }
+    const githubRepo = await getGithubRepoFromNpm(packageName);
 
-    return "ERROR";
+    if (githubRepo) {
+      await log(`Found GitHub repository for package ${packageName}: ${githubRepo}`, 1);
+      return githubRepo;
+    } else {
+      return url;
+    }
   }
+  return url;
+}
 
+export async function processURL(url: string): Promise<object> {
+  // if (!isValidUrl(url)) {
+  //   await log(`Invalid URL: ${url}`, 2);
+
+  //   return "ERROR";
+  // }
+  
   await log(`Processing URL: ${url}`, 1);
   const handler = new URLHandler(url);
 
@@ -1173,10 +1191,33 @@ async function runTests(): Promise<void> {
   }
 }
 
+async function cloneRepo(url: string, dir: string)
+{
+  await git.clone({
+    fs,
+    http,
+    dir,
+    url: url,
+    singleBranch: true,
+    depth: 1,
+    noCheckout: true,
+  });
+
+  console.log("TEST");
+
+  // Checkout only the README file
+  await git.checkout({
+    fs,
+    dir,
+    ref: 'HEAD',
+    filepaths: ['README.md'],
+    force: true,
+  });
+}
 
 // Export the necessary functions and classes
 export {URLHandler, Metric, RampUp, Correctness, BusFactor, ResponsiveMaintainer, License, PullRequest, FractionalDependency,
-        isValidUrl, processURLs, getGithubRepoFromNpm, log};
+        isValidUrl, processURLs, getGithubRepoFromNpm, log, cloneRepo };
 
 /**
  * Main function that handles command-line arguments and executes the appropriate action
