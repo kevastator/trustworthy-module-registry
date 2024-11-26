@@ -33,23 +33,17 @@ const AWS = __importStar(require("aws-sdk"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs = __importStar(require("fs"));
 dotenv_1.default.config();
-if (!process.env.AWS_ACCESS_KEY) {
-    console.error(JSON.stringify({ error: "AWS_ACCESS_KEY environment variable is not set" }));
-    process.exit(1);
-}
-if (!process.env.AWS_SECRET_ACCESS_KEY) {
-    console.error(JSON.stringify({ error: "AWS_SECRET_ACCESS_KEY environment variable is not set" }));
-    process.exit(1);
-}
 if (!process.env.AWS_REGION) {
     console.error(JSON.stringify({ error: "AWS_REGION environment variable is not set" }));
     process.exit(1);
 }
-AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
-});
+if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY) {
+    AWS.config.update({
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION,
+    });
+}
 const s3 = new AWS.S3({
     signatureVersion: 'v4'
 });

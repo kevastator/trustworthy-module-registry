@@ -232,4 +232,6 @@ async function mainTest() {
         console.log("Loopback could not be performed due to no content generated");
     }
 }
-mainTest();
+if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY) {
+    mainTest();
+}

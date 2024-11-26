@@ -288,4 +288,7 @@ async function mainTest()
     }
 }
 
-mainTest();
+if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY)
+{
+    mainTest();
+}
