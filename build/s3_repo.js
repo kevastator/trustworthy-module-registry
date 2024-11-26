@@ -50,7 +50,9 @@ AWS.config.update({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION,
 });
-const s3 = new AWS.S3();
+const s3 = new AWS.S3({
+    signatureVersion: 'v4'
+});
 const delimeter = "/";
 const bucketName = "trust-repository";
 const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName1" + delimeter + "zip";
