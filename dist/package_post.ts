@@ -1,11 +1,15 @@
 import { isValidUrl, processURL, resolveNpmToGithub } from './rate';
 import { debloatPackage } from './debloat';
 import { uploadPackage, checkPrefixExists } from './s3_repo';
-import simpleGit from 'simple-git';
-import { readFileSync, existsSync, mkdirSync, createWriteStream, writeFile, writeFileSync, createReadStream } from 'fs';
+import { promises as fs, readFileSync, existsSync, mkdirSync, createWriteStream, writeFile, writeFileSync, createReadStream } from 'fs';
 import archiver from 'archiver'
 import * as unzipper from 'unzipper'
 import { Handler } from 'aws-lambda';
+
+import * as path from 'path';
+import * as http from 'isomorphic-git/http/node';
+import * as git from 'isomorphic-git';
+
 
 import { setTimeout } from 'timers/promises';
 
@@ -104,7 +108,12 @@ async function urlExtract(testurl: string, dir: string, JSProgram: string, deblo
     // Clone the repository
     try
     {
-        await simpleGit().clone(validURL, dir);
+        await git.clone({
+            fs,
+            http,
+            dir,
+            url: validURL,
+        });
     }
     catch
     {
@@ -279,4 +288,4 @@ async function mainTest()
     }
 }
 
-//mainTest();
+mainTest();

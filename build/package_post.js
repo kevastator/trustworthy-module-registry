@@ -30,10 +30,11 @@ exports.handler = void 0;
 const rate_1 = require("./rate");
 const debloat_1 = require("./debloat");
 const s3_repo_1 = require("./s3_repo");
-const simple_git_1 = __importDefault(require("simple-git"));
 const fs_1 = require("fs");
 const archiver_1 = __importDefault(require("archiver"));
 const unzipper = __importStar(require("unzipper"));
+const http = __importStar(require("isomorphic-git/http/node"));
+const git = __importStar(require("isomorphic-git"));
 const promises_1 = require("timers/promises");
 const Err400 = {
     statusCode: 400,
@@ -105,7 +106,12 @@ async function urlExtract(testurl, dir, JSProgram, debloat) {
     }
     // Clone the repository
     try {
-        await (0, simple_git_1.default)().clone(validURL, dir);
+        await git.clone({
+            fs: fs_1.promises,
+            http,
+            dir,
+            url: validURL,
+        });
     }
     catch {
         return Err400;
@@ -226,4 +232,4 @@ async function mainTest() {
         console.log("Loopback could not be performed due to no content generated");
     }
 }
-//mainTest();
+mainTest();
