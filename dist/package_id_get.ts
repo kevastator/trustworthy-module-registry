@@ -38,22 +38,47 @@ export const handler: Handler = async (event, context) => {
         return Err404;
     }
 
-    const result = {
-        statusCode: 200,
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: {
-                Name: searchResults.Name,
-                Version: searchResults.Version,
-                ID: searchResults.ID
+    if ("URL" in searchResults)
+    {
+        const result = {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json"
             },
-            data: {
-                Content: searchResults.Content
-            }
-        })
-    };
+            body: JSON.stringify({
+                message: {
+                    Name: searchResults.Name,
+                    Version: searchResults.Version,
+                    ID: searchResults.ID
+                },
+                data: {
+                    Content: searchResults.Content,
+                    URL: searchResults.URL
+                }
+            })
+        };
 
-    return result;
+        return result;
+    }
+    else
+    {
+        const result = {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: {
+                    Name: searchResults.Name,
+                    Version: searchResults.Version,
+                    ID: searchResults.ID
+                },
+                data: {
+                    Content: searchResults.Content
+                }
+            })
+        };
+
+        return result;
+    }
 };

@@ -30,22 +30,44 @@ const handler = async (event, context) => {
     if (searchResults.Content == "") {
         return Err404;
     }
-    const result = {
-        statusCode: 200,
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: {
-                Name: searchResults.Name,
-                Version: searchResults.Version,
-                ID: searchResults.ID
+    if ("URL" in searchResults) {
+        const result = {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json"
             },
-            data: {
-                Content: searchResults.Content
-            }
-        })
-    };
-    return result;
+            body: JSON.stringify({
+                message: {
+                    Name: searchResults.Name,
+                    Version: searchResults.Version,
+                    ID: searchResults.ID
+                },
+                data: {
+                    Content: searchResults.Content,
+                    URL: searchResults.URL
+                }
+            })
+        };
+        return result;
+    }
+    else {
+        const result = {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: {
+                    Name: searchResults.Name,
+                    Version: searchResults.Version,
+                    ID: searchResults.ID
+                },
+                data: {
+                    Content: searchResults.Content
+                }
+            })
+        };
+        return result;
+    }
 };
 exports.handler = handler;
