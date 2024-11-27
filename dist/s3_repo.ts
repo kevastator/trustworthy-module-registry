@@ -248,25 +248,9 @@ export async function getByID(packageID: string)
 
                         const obData = await s3.getObject(getObjectCommand).promise();
 
-                        const stream = obData.Body as ReadableStream<any>;
-                        const chunks: Buffer[] = [];
+                        const stream = obData.Body 
                         
-
-                        const reader = stream.getReader();
-                        let done = false;
-                        while (!done) 
-                        {
-                            const { value, done: isDone } = await reader.read();
-                            done = isDone;
-
-                            if (value) 
-                            {
-                                chunks.push(Buffer.from(value));  // Ensure the chunk is properly converted to Buffer
-                            }
-                        }
-
-                        const buffer = Buffer.concat(chunks);
-                        const base64 = buffer.toString('base64');
+                        const base64 = stream?.toString('base64');
 
                         return {
                             Content: base64,
