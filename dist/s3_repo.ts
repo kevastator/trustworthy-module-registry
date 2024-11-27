@@ -23,7 +23,7 @@ const s3 = new AWS.S3({
 });
 const delimeter = "/";
 const bucketName = "trust-repository";
-const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName1" + delimeter +  "zip";
+const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter +  "zip";
 
 export async function uploadPackage(dir: string, name: string): Promise<string>
 {
@@ -198,6 +198,90 @@ export async function reset()
     catch (err)
     {
         console.log(err);
+    }
+}
+
+export async function getByID(packageID: string)
+{
+    const lastUnder: number = packageID.lastIndexOf("-");
+    const packageName: string = packageID.slice(0, lastUnder);
+
+    if (lastUnder == -1)
+    {
+        return {
+            Content: "",
+            Name: "",
+            ID: "",
+            Version: ""
+        }
+    }
+
+    const params: AWS.S3.ListObjectsV2Request = {
+        Bucket: bucketName,
+        Prefix: packageName + "/",
+    };
+
+    let continuationToken: string | undefined = undefined;
+
+    let isTruncated = true;  // To check if there are more objects to list
+
+    while (isTruncated)
+    {
+        try
+        {
+            if (continuationToken) {
+                params.ContinuationToken = continuationToken;  // Set continuation token for pagination
+            }
+
+            const data = await s3.listObjectsV2(params).promise();
+
+            if (data.Contents)
+            {
+                data.Contents.forEach(async (object) => {
+                    if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip")
+                    {
+                        const getObjectCommand: AWS.S3.GetObjectRequest = {
+                            Bucket: bucketName,
+                            Key: object.Key,
+                        };
+
+                        const obData = await s3.getObject(getObjectCommand).promise();
+
+                        const stream = obData.Body as ReadableStream<any>;
+                        const chunks: Buffer[] = [];
+                        for await (let chunk of stream) 
+                        {
+                            chunks.push(Buffer.from(chunk));
+                        }
+
+                        const buffer = Buffer.concat(chunks);
+                        const base64 = buffer.toString('base64');
+
+                        return {
+                            Content: base64,
+                            Name: packageName,
+                            ID: packageID,
+                            Version: object.Key?.split(delimeter)[1]
+                        }
+                    }
+                });
+            }
+
+            isTruncated = data.IsTruncated as boolean;
+            continuationToken = data.NextContinuationToken;
+        }
+        catch (err)
+        {
+            console.log(err);
+            break;
+        }
+    }
+
+    return {
+        Content: "",
+        Name: "",
+        ID: "",
+        Version: ""
     }
 }
 

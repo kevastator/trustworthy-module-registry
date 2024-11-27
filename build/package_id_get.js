@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
+const s3_repo_1 = require("./s3_repo");
 const Err400 = {
     statusCode: 400,
     headers: {
@@ -24,7 +25,11 @@ const handler = async (event, context) => {
     if (id == undefined) {
         return Err400;
     }
-    // TODO S3 SEARCH AND RETURN 404 IF NOT FOUND
+    // S3 SEARCH AND RETURN 404 IF NOT FOUND
+    const searchResults = await (0, s3_repo_1.getByID)(id);
+    if (searchResults.Content == "") {
+        return Err404;
+    }
     // MOCK RETURN
     const result = {
         statusCode: 200,
@@ -33,14 +38,15 @@ const handler = async (event, context) => {
         },
         body: JSON.stringify({
             message: {
-                Name: "Underscore",
-                Version: "1.0.0",
-                ID: "123123"
+                Name: searchResults.Name,
+                Version: searchResults.Version,
+                ID: searchResults.ID
             },
             data: {
-                Content: "UEsDBAoAAAAAACAfUFkAAAAAAAAAAAAAAAASAAkAdW5kZXJzY29yZS1t.........fQFQAoADBkODIwZWY3MjkyY2RlYzI4ZGQ4YjVkNTY1OTIxYjgxMDBjYTMzOTc=\n"
+                Content: searchResults.Content
             }
         })
     };
+    return result;
 };
 exports.handler = handler;

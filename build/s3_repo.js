@@ -29,6 +29,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadPackage = uploadPackage;
 exports.checkPrefixExists = checkPrefixExists;
 exports.reset = reset;
+exports.getByID = getByID;
 exports.versionGreaterThan = versionGreaterThan;
 exports.checkValidVersion = checkValidVersion;
 const AWS = __importStar(require("aws-sdk"));
@@ -51,7 +52,7 @@ const s3 = new AWS.S3({
 });
 const delimeter = "/";
 const bucketName = "trust-repository";
-const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName1" + delimeter + "zip";
+const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter + "zip";
 async function uploadPackage(dir, name) {
     try {
         const fileStreamZip = fs.createReadStream(dir + ".zip");
@@ -170,6 +171,68 @@ async function reset() {
     catch (err) {
         console.log(err);
     }
+}
+async function getByID(packageID) {
+    const lastUnder = packageID.lastIndexOf("-");
+    const packageName = packageID.slice(0, lastUnder);
+    if (lastUnder == -1) {
+        return {
+            Content: "",
+            Name: "",
+            ID: "",
+            Version: ""
+        };
+    }
+    const params = {
+        Bucket: bucketName,
+        Prefix: packageName + "/",
+    };
+    let continuationToken = undefined;
+    let isTruncated = true; // To check if there are more objects to list
+    while (isTruncated) {
+        try {
+            if (continuationToken) {
+                params.ContinuationToken = continuationToken; // Set continuation token for pagination
+            }
+            const data = await s3.listObjectsV2(params).promise();
+            if (data.Contents) {
+                data.Contents.forEach(async (object) => {
+                    if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip") {
+                        const getObjectCommand = {
+                            Bucket: bucketName,
+                            Key: object.Key,
+                        };
+                        const obData = await s3.getObject(getObjectCommand).promise();
+                        const stream = obData.Body;
+                        const chunks = [];
+                        for await (let chunk of stream) {
+                            chunks.push(Buffer.from(chunk));
+                        }
+                        const buffer = Buffer.concat(chunks);
+                        const base64 = buffer.toString('base64');
+                        return {
+                            Content: base64,
+                            Name: packageName,
+                            ID: packageID,
+                            Version: object.Key?.split(delimeter)[1]
+                        };
+                    }
+                });
+            }
+            isTruncated = data.IsTruncated;
+            continuationToken = data.NextContinuationToken;
+        }
+        catch (err) {
+            console.log(err);
+            break;
+        }
+    }
+    return {
+        Content: "",
+        Name: "",
+        ID: "",
+        Version: ""
+    };
 }
 function versionGreaterThan(versionG, versionL) {
     let versionG1 = Number(versionG.split(".")[0]);
