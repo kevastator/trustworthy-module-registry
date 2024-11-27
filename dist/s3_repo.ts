@@ -250,9 +250,19 @@ export async function getByID(packageID: string)
 
                         const stream = obData.Body as ReadableStream<any>;
                         const chunks: Buffer[] = [];
-                        for await (let chunk of stream) 
+                        
+
+                        const reader = stream.getReader();
+                        let done = false;
+                        while (!done) 
                         {
-                            chunks.push(Buffer.from(chunk));
+                            const { value, done: isDone } = await reader.read();
+                            done = isDone;
+
+                            if (value) 
+                            {
+                                chunks.push(Buffer.from(value));  // Ensure the chunk is properly converted to Buffer
+                            }
                         }
 
                         const buffer = Buffer.concat(chunks);
