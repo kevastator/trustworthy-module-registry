@@ -57,21 +57,17 @@ const Err424 = {
 const handler = async (event, context) => {
     const url = event.URL;
     const content = event.Content;
-    let JS = event.JSProgram;
     var debloat = event.debloat;
-    if (!JS) {
-        JS = "null";
-    }
     if (debloat == undefined) {
         debloat = false;
     }
-    if ((url == undefined && content == undefined) || (url != undefined && content != undefined) || JS == undefined) {
+    if ((url == undefined && content == undefined) || (url != undefined && content != undefined)) {
         return Err400;
     }
     try {
         // URL Proceedure
         if (url != undefined) {
-            return urlExtract(url, "/tmp/repo", JS, debloat);
+            return urlExtract(url, "/tmp/repo", debloat);
         }
         // Content Proceedure
         else {
@@ -79,7 +75,7 @@ const handler = async (event, context) => {
             if (Name == undefined) {
                 return Err400;
             }
-            return contentExtract(content, "/tmp/repo", JS, Name, debloat);
+            return contentExtract(content, "/tmp/repo", Name, debloat);
         }
     }
     catch {
@@ -87,7 +83,7 @@ const handler = async (event, context) => {
     }
 };
 exports.handler = handler;
-async function urlExtract(testurl, dir, JSProgram, debloat) {
+async function urlExtract(testurl, dir, debloat) {
     // Check if the url is valid, if not return 400
     if (!(0, rate_1.isValidUrl)(testurl)) {
         return Err400;
@@ -153,14 +149,13 @@ async function urlExtract(testurl, dir, JSProgram, debloat) {
             },
             data: {
                 Content: base64,
-                URL: validURL,
-                JSProgram: JSProgram
+                URL: validURL
             }
         }
     };
     return result;
 }
-async function contentExtract(content, dir, JSProgram, Name, debloat) {
+async function contentExtract(content, dir, Name, debloat) {
     // Create the buffer
     const zipBuffer = Buffer.from(content, 'base64');
     // Ensure the directory exists
@@ -218,18 +213,17 @@ async function contentExtract(content, dir, JSProgram, Name, debloat) {
                 ID: id
             },
             data: {
-                Content: base64,
-                JSProgram: JSProgram
+                Content: base64
             }
         }
     };
     return result;
 }
 async function mainTest() {
-    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", "null", false);
+    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
     console.log(result);
     try {
-        const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", "null", result.body.metadata.Name, false);
+        const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);
         console.log(result2);
     }
     catch {
