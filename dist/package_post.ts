@@ -44,9 +44,11 @@ const Err424 = {
 };
 
 export const handler: Handler = async (event, context) => {
-    const url = event.body.URL;
-    const content = event.body.Content;
-    var debloat = event.body.debloat;
+    const body = JSON.parse(event.body); 
+    
+    const url = body.URL;
+    const content = body.Content;
+    var debloat = body.debloat;
 
     if (debloat == undefined)
     {
@@ -68,7 +70,7 @@ export const handler: Handler = async (event, context) => {
         // Content Proceedure
         else
         {
-            const Name = event.body.Name;
+            const Name = body.Name;
 
             // Check formatting of the Name
             if (Name == undefined || Name.includes("/"))
