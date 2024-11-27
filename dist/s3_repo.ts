@@ -233,6 +233,7 @@ export async function getByID(packageID: string)
                 params.ContinuationToken = continuationToken;  // Set continuation token for pagination
             }
 
+            // Get object list
             const data = await s3.listObjectsV2(params).promise();
 
             if (data.Contents)
@@ -241,6 +242,7 @@ export async function getByID(packageID: string)
                 {
                     if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip")
                     {
+                        // Get the associated object and convert to base64
                         const getObjectCommand: AWS.S3.GetObjectRequest = {
                             Bucket: bucketName,
                             Key: object.Key,
@@ -252,12 +254,34 @@ export async function getByID(packageID: string)
                         
                         const base64 = stream?.toString('base64');
 
-                        return {
+                        // Check if this needs a URL in it by getting the JSON file
+                        const getObjectJsonCommand: AWS.S3.GetObjectRequest = {
+                            Bucket: bucketName,
+                            Key: object.Key.slice(0, object.Key.lastIndexOf(delimeter)) + delimeter + "json",
+                        };
+
+                        const obJData = await s3.getObject(getObjectJsonCommand).promise();
+                        
+                        const streamJ = obJData.Body 
+                        
+                        const data = JSON.parse(streamJ?.toString('utf-8')!);
+
+                        // Format our results
+                        const result: any =  {
                             Content: base64,
                             Name: packageName,
                             ID: packageID,
                             Version: object.Key?.split(delimeter)[1]
                         }
+
+                        // Add the URL if Needed
+                        if (!data.ByContent)
+                        {
+                            result.URL = data.URL;
+                        }
+                        
+                        // Return Result
+                        return result;
                     }
                 }
             }

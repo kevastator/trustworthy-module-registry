@@ -105,7 +105,7 @@ async function urlExtract(testurl, dir, debloat) {
     // var Name: string = urlStringList[urlStringList.length - 1];
     // Name = Name[0].toUpperCase() + Name.slice(1);
     // Rate Package
-    const rating = await (0, rate_1.processURL)(validURL);
+    let rating = await (0, rate_1.processURL)(validURL);
     const ratedResult = rating.NetScore;
     if (ratedResult < 0.5) {
         return Err424;
@@ -151,6 +151,8 @@ async function urlExtract(testurl, dir, debloat) {
     const zipBuffer = (0, fs_1.readFileSync)(zipdir);
     const base64 = zipBuffer.toString('base64');
     // Send Rating to json
+    rating.Cost = zipBuffer.byteLength / 1000000;
+    rating.ByContent = false;
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
@@ -216,8 +218,8 @@ async function contentExtract(content, dir, Name, debloat) {
         // Convert to a valid repo and define the dir for the cloned repo
         const validURL = await (0, rate_1.resolveNpmToGithub)(testurl);
         // Rate Package
-        const ratedResult = (await (0, rate_1.processURL)(validURL)).NetScore;
-        if (ratedResult < 0.5) {
+        var rating = await (0, rate_1.processURL)(validURL);
+        if (rating.NetScore < 0.5) {
             return Err424;
         }
         // Debloat the package if true
@@ -227,6 +229,15 @@ async function contentExtract(content, dir, Name, debloat) {
     }
     catch {
         return Err424;
+    }
+    // Send Rating to json
+    rating.Cost = zipBuffer.byteLength / 1000000;
+    rating.ByContent = true;
+    (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
+    // Check if the package exists -> Return 409 if not!
+    const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
+    if (prefixCheck) {
+        return Err409;
     }
     // UPLOAD TO S3 (Version and ID)
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name);

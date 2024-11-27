@@ -103,7 +103,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     // Name = Name[0].toUpperCase() + Name.slice(1);
 
     // Rate Package
-    const rating = await processURL(validURL);
+    let rating: any = await processURL(validURL);
     const ratedResult: number = (rating as { NetScore:number }).NetScore;
 
     if (ratedResult < 0.5)
@@ -171,6 +171,9 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     const base64 = zipBuffer.toString('base64');
 
     // Send Rating to json
+    rating.Cost = zipBuffer.byteLength / 1000000;
+    rating.ByContent = false;
+
     writeFileSync(dir + ".json", JSON.stringify(rating));
 
     // Check if the package exists -> Return 409 if not!
@@ -261,9 +264,9 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         const validURL: string = await resolveNpmToGithub(testurl);
 
         // Rate Package
-        const ratedResult: number = (await processURL(validURL) as { NetScore:number }).NetScore;
+        var rating: any = await processURL(validURL);
 
-        if (ratedResult < 0.5)
+        if (rating.NetScore < 0.5)
         {
             return Err424;
         }
@@ -280,6 +283,19 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         return Err424;
     }
     
+
+    // Send Rating to json
+    rating.Cost = zipBuffer.byteLength / 1000000;
+    rating.ByContent = true;
+
+    writeFileSync(dir + ".json", JSON.stringify(rating));
+
+    // Check if the package exists -> Return 409 if not!
+    const prefixCheck = await checkPrefixExists(Name);
+    if (prefixCheck)
+    {
+        return Err409;
+    }
 
     // UPLOAD TO S3 (Version and ID)
     const id: string = await uploadPackage(dir, Name);
