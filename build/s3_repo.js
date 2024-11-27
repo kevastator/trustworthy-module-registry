@@ -30,6 +30,7 @@ exports.uploadPackage = uploadPackage;
 exports.checkPrefixExists = checkPrefixExists;
 exports.reset = reset;
 exports.getByID = getByID;
+exports.getRatingByID = getRatingByID;
 exports.versionGreaterThan = versionGreaterThan;
 exports.checkValidVersion = checkValidVersion;
 const AWS = __importStar(require("aws-sdk"));
@@ -227,6 +228,99 @@ async function getByID(packageID) {
         Name: "",
         ID: "",
         Version: ""
+    };
+}
+async function getRatingByID(packageID) {
+    const lastUnder = packageID.lastIndexOf("-");
+    const packageName = packageID.slice(0, lastUnder);
+    if (lastUnder == -1) {
+        return {
+            BusFactor: undefined,
+            BusFactorLatency: undefined,
+            Correctness: undefined,
+            CorrectnessLatency: undefined,
+            RampUp: undefined,
+            RampUpLatency: undefined,
+            ResponsiveMaintainer: undefined,
+            ResponsiveMaintainerLatency: undefined,
+            LicenseScore: undefined,
+            LicenseScoreLatency: undefined,
+            GoodPinningPractice: undefined,
+            GoodPinningPracticeLatency: undefined,
+            PullRequest: undefined,
+            PullRequestLatency: undefined,
+            NetScore: undefined,
+            NetScoreLatency: -1
+        };
+    }
+    const params = {
+        Bucket: bucketName,
+        Prefix: packageName + "/",
+    };
+    let continuationToken = undefined;
+    let isTruncated = true; // To check if there are more objects to list
+    while (isTruncated) {
+        try {
+            if (continuationToken) {
+                params.ContinuationToken = continuationToken; // Set continuation token for pagination
+            }
+            const data = await s3.listObjectsV2(params).promise();
+            if (data.Contents) {
+                for (let object of data.Contents) {
+                    if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "json") {
+                        const getObjectCommand = {
+                            Bucket: bucketName,
+                            Key: object.Key,
+                        };
+                        const obData = await s3.getObject(getObjectCommand).promise();
+                        const stream = obData.Body;
+                        const rating = JSON.parse(stream?.toString('utf-8'));
+                        return {
+                            BusFactor: rating.BusFactor,
+                            BusFactorLatency: rating.BusFactor_Latency,
+                            Correctness: rating.Correctness,
+                            CorrectnessLatency: rating.Correctness_Latency,
+                            RampUp: rating.RampUp,
+                            RampUpLatency: rating.RampUp_Latency,
+                            ResponsiveMaintainer: rating.ResponsiveMaintainer,
+                            ResponsiveMaintainerLatency: rating.ResponsiveMaintainer_Latency,
+                            LicenseScore: rating.License,
+                            LicenseScoreLatency: rating.License_Latency,
+                            GoodPinningPractice: rating.FractionalDependency,
+                            GoodPinningPracticeLatency: rating.FractionalDependency_Latency,
+                            PullRequest: rating.PullRequest,
+                            PullRequestLatency: rating.PullRequest_Latency,
+                            NetScore: rating.NetScore,
+                            NetScoreLatency: rating.NetScore_Latency
+                        };
+                    }
+                }
+            }
+            isTruncated = data.IsTruncated;
+            continuationToken = data.NextContinuationToken;
+        }
+        catch (err) {
+            console.log(err);
+            break;
+        }
+    }
+    return {
+        BusFactor: undefined,
+        BusFactorLatency: undefined,
+        Correctness: undefined,
+        CorrectnessLatency: undefined,
+        RampUp: undefined,
+        RampUpLatency: undefined,
+        ResponsiveMaintainer: undefined,
+        ResponsiveMaintainerLatency: undefined,
+        LicenseScore: undefined,
+        LicenseScoreLatency: undefined,
+        GoodPinningPractice: undefined,
+        GoodPinningPracticeLatency: undefined,
+        PullRequest: undefined,
+        PullRequestLatency: undefined,
+        NetScore: undefined,
+        NetScoreLatency: -1
     };
 }
 function versionGreaterThan(versionG, versionL) {

@@ -1,27 +1,42 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
+const s3_repo_1 = require("./s3_repo");
+const Err400 = {
+    statusCode: 400,
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        message: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."
+    })
+};
+const Err404 = {
+    statusCode: 404,
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        message: "Package does not exist."
+    })
+};
 const handler = async (event, context) => {
-    return {
+    const id = event.pathParameters.id;
+    if (id == undefined) {
+        return Err400;
+    }
+    // S3 SEARCH AND RETURN 404 IF NOT FOUND
+    const searchResults = await (0, s3_repo_1.getRatingByID)(id);
+    if (searchResults.NetScoreLatency == -1) {
+        return Err404;
+    }
+    const result = {
         statusCode: 200,
-        body: {
-            BusFactor: 0.1,
-            BusFactorLatency: 0.1,
-            Correctness: 0.1,
-            CorrectnessLatency: 0.1,
-            RampUp: 0.1,
-            RampUpLatency: 0.1,
-            ResponsiveMaintainer: 0.1,
-            ResponsiveMaintainerLatency: 0.1,
-            LicenseScore: 0.1,
-            LicenseScoreLatency: 0.1,
-            GoodPinningPractice: 0.1,
-            GoodPinningPracticeLatency: 0.1,
-            PullRequest: 0.1,
-            PullRequestLatency: 0.1,
-            NetScore: 0.1,
-            NetScoreLatency: 0.1
-        }
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(searchResults)
     };
+    return result;
 };
 exports.handler = handler;
