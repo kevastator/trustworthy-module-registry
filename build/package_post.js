@@ -38,26 +38,35 @@ const git = __importStar(require("isomorphic-git"));
 const promises_1 = require("timers/promises");
 const Err400 = {
     statusCode: 400,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)"
-    }
+    })
 };
 const Err409 = {
     statusCode: 409,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "Package exists already."
-    }
+    })
 };
 const Err424 = {
     statusCode: 424,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "Package is not uploaded due to the disqualified rating."
-    }
+    })
 };
 const handler = async (event, context) => {
-    const url = event.URL;
-    const content = event.Content;
-    var debloat = event.debloat;
+    const url = event.body.URL;
+    const content = event.body.Content;
+    var debloat = event.body.debloat;
     if (debloat == undefined) {
         debloat = false;
     }
@@ -71,8 +80,9 @@ const handler = async (event, context) => {
         }
         // Content Proceedure
         else {
-            const Name = event.Name;
-            if (Name == undefined) {
+            const Name = event.body.Name;
+            // Check formatting of the Name
+            if (Name == undefined || Name.includes("/")) {
                 return Err400;
             }
             return contentExtract(content, "/tmp/repo", Name, debloat);
@@ -90,9 +100,9 @@ async function urlExtract(testurl, dir, debloat) {
     }
     // Convert to a valid repo and define the dir for the cloned repo
     const validURL = await (0, rate_1.resolveNpmToGithub)(testurl);
-    const urlStringList = testurl.split("/");
-    var Name = urlStringList[urlStringList.length - 1];
-    Name = Name[0].toUpperCase() + Name.slice(1);
+    // const urlStringList: string[] = testurl.split("/");
+    // var Name: string = urlStringList[urlStringList.length - 1];
+    // Name = Name[0].toUpperCase() + Name.slice(1);
     // Rate Package
     const rating = await (0, rate_1.processURL)(validURL);
     const ratedResult = rating.NetScore;
@@ -103,6 +113,7 @@ async function urlExtract(testurl, dir, debloat) {
     if (!(0, fs_1.existsSync)(dir)) {
         (0, fs_1.mkdirSync)(dir, { recursive: true });
     }
+    var Name = "";
     // Clone the repository
     try {
         await git.clone({
@@ -111,6 +122,14 @@ async function urlExtract(testurl, dir, debloat) {
             dir,
             url: validURL,
         });
+        const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
+        const packageJson = JSON.parse(packageData);
+        if ("name" in packageJson && !packageJson.name.includes("/")) {
+            Name = packageJson.name;
+        }
+        else {
+            return Err400;
+        }
     }
     catch {
         return Err400;
@@ -141,7 +160,10 @@ async function urlExtract(testurl, dir, debloat) {
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name);
     const result = {
         statusCode: 201,
-        body: {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
             metadata: {
                 Name: Name,
                 Version: "1.0.0",
@@ -151,7 +173,7 @@ async function urlExtract(testurl, dir, debloat) {
                 Content: base64,
                 URL: validURL
             }
-        }
+        })
     };
     return result;
 }
@@ -173,6 +195,7 @@ async function contentExtract(content, dir, Name, debloat) {
         const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
         const packageJson = JSON.parse(packageData);
         let testurl = "";
+        // Find the Test URL
         if ("homepage" in packageJson) {
             testurl = packageJson.homepage;
         }
@@ -185,6 +208,7 @@ async function contentExtract(content, dir, Name, debloat) {
                 testurl = testurl.split(".git")[0];
             }
         }
+        // Disqualify Based on no URL present
         if (testurl == "") {
             return Err424;
         }
@@ -195,6 +219,7 @@ async function contentExtract(content, dir, Name, debloat) {
         if (ratedResult < 0.5) {
             return Err424;
         }
+        // Debloat the package if true
         (0, debloat_1.debloatPackage)(zipFileDir, debloat);
         const zipBufferd = (0, fs_1.readFileSync)(zipFileDir);
         var base64 = zipBufferd.toString('base64');
@@ -206,7 +231,10 @@ async function contentExtract(content, dir, Name, debloat) {
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name);
     const result = {
         statusCode: 201,
-        body: {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
             metadata: {
                 Name: Name,
                 Version: "1.0.0",
@@ -215,7 +243,7 @@ async function contentExtract(content, dir, Name, debloat) {
             data: {
                 Content: base64
             }
-        }
+        })
     };
     return result;
 }

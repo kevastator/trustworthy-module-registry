@@ -4,15 +4,23 @@ exports.handler = void 0;
 const s3_repo_1 = require("./s3_repo");
 const Err401 = {
     statusCode: 401,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "You do not have permission to reset the registry."
-    }
+    })
 };
 const handler = async (event, context) => {
     await (0, s3_repo_1.reset)();
     const result = {
         statusCode: 200,
-        message: "Registry is reset."
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: "Registry is reset."
+        })
     };
     return result;
 };
@@ -21,4 +29,6 @@ async function mainTest() {
     await (0, s3_repo_1.reset)();
     console.log("Supposedly Reset!");
 }
-mainTest();
+if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY) {
+    mainTest();
+}

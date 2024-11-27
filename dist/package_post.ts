@@ -15,29 +15,38 @@ import { setTimeout } from 'timers/promises';
 
 const Err400 = {
     statusCode: 400,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)"
-    }
+    })
 };
 
 const Err409 = {
     statusCode: 409,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "Package exists already."
-    }
+    })
 };
 
 const Err424 = {
     statusCode: 424,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "Package is not uploaded due to the disqualified rating."
-    }
+    })
 };
 
 export const handler: Handler = async (event, context) => {
-    const url = event.URL;
-    const content = event.Content;
-    var debloat = event.debloat;
+    const url = event.body.URL;
+    const content = event.body.Content;
+    var debloat = event.body.debloat;
 
     if (debloat == undefined)
     {
@@ -59,9 +68,10 @@ export const handler: Handler = async (event, context) => {
         // Content Proceedure
         else
         {
-            const Name = event.Name;
+            const Name = event.body.Name;
 
-            if (Name == undefined)
+            // Check formatting of the Name
+            if (Name == undefined || Name.includes("/"))
             {
                 return Err400;
             }
@@ -86,9 +96,9 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     // Convert to a valid repo and define the dir for the cloned repo
     const validURL: string = await resolveNpmToGithub(testurl);
 
-    const urlStringList: string[] = testurl.split("/");
-    var Name: string = urlStringList[urlStringList.length - 1];
-    Name = Name[0].toUpperCase() + Name.slice(1);
+    // const urlStringList: string[] = testurl.split("/");
+    // var Name: string = urlStringList[urlStringList.length - 1];
+    // Name = Name[0].toUpperCase() + Name.slice(1);
 
     // Rate Package
     const rating = await processURL(validURL);
@@ -104,6 +114,8 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
         mkdirSync(dir, { recursive: true });
     }
 
+    var Name: string = "";
+
     // Clone the repository
     try
     {
@@ -113,6 +125,19 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
             dir,
             url: validURL,
         });
+
+        const packageData = await readFileSync(dir + "/package.json", "utf-8");
+
+        const packageJson = JSON.parse(packageData);
+
+        if ("name" in packageJson && !packageJson.name.includes("/"))
+        {
+            Name = packageJson.name;
+        }
+        else
+        {
+            return Err400;
+        }
     }
     catch
     {
@@ -158,7 +183,10 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
 
     const result = {
         statusCode: 201,
-        body: {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
             metadata: {
                 Name: Name,
                 Version: "1.0.0",
@@ -168,7 +196,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
                 Content: base64,
                 URL: validURL
             }
-        }
+        })
     };
 
     return result
@@ -201,6 +229,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         const packageJson = JSON.parse(packageData);
         let testurl: string = "";
 
+        // Find the Test URL
         if ("homepage" in packageJson)
         {
             testurl = packageJson.homepage;
@@ -220,6 +249,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
             }
         }
 
+        // Disqualify Based on no URL present
         if (testurl == "")
         {
             return Err424;
@@ -236,6 +266,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
             return Err424;
         }
 
+        // Debloat the package if true
         debloatPackage(zipFileDir, debloat);
 
         const zipBufferd = readFileSync(zipFileDir);
@@ -253,7 +284,10 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
     const result = {
         statusCode: 201,
-        body: {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
             metadata: {
                 Name: Name,
                 Version: "1.0.0",
@@ -262,7 +296,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
             data: {
                 Content: base64
             }
-        }
+        })
     };
 
     return result
