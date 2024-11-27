@@ -37,7 +37,6 @@ const Err424 = {
 export const handler: Handler = async (event, context) => {
     const url = event.URL;
     const content = event.Content;
-    const JS = event.JSProgram;
     var debloat = event.debloat;
 
     if (debloat == undefined)
@@ -45,7 +44,7 @@ export const handler: Handler = async (event, context) => {
         debloat = false;
     }
 
-    if ((url == undefined && content == undefined) || (url != undefined && content != undefined) || JS == undefined)
+    if ((url == undefined && content == undefined) || (url != undefined && content != undefined))
     {
         return Err400;
     }
@@ -55,7 +54,7 @@ export const handler: Handler = async (event, context) => {
         // URL Proceedure
         if (url != undefined)
         {  
-            return urlExtract(url, "/tmp/repo", JS, debloat);
+            return urlExtract(url, "/tmp/repo", debloat);
         }
         // Content Proceedure
         else
@@ -67,7 +66,7 @@ export const handler: Handler = async (event, context) => {
                 return Err400;
             }
 
-            return contentExtract(content, "/tmp/repo", JS, Name, debloat);
+            return contentExtract(content, "/tmp/repo", Name, debloat);
         }
     }
     catch
@@ -76,7 +75,7 @@ export const handler: Handler = async (event, context) => {
     }
 };
 
-async function urlExtract(testurl: string, dir: string, JSProgram: string, debloat: boolean)
+async function urlExtract(testurl: string, dir: string, debloat: boolean)
 {
     // Check if the url is valid, if not return 400
     if (!isValidUrl(testurl))
@@ -167,8 +166,7 @@ async function urlExtract(testurl: string, dir: string, JSProgram: string, deblo
             },
             data: {
                 Content: base64,
-                URL: validURL,
-                JSProgram: JSProgram
+                URL: validURL
             }
         }
     };
@@ -176,7 +174,7 @@ async function urlExtract(testurl: string, dir: string, JSProgram: string, deblo
     return result
 }
 
-async function contentExtract(content: string, dir: string, JSProgram: string, Name: string, debloat: boolean)
+async function contentExtract(content: string, dir: string, Name: string, debloat: boolean)
 {
     // Create the buffer
     const zipBuffer = Buffer.from(content, 'base64');
@@ -250,7 +248,8 @@ async function contentExtract(content: string, dir: string, JSProgram: string, N
     }
     
 
-    // TODO UPLOAD TO S3 (Version and ID)
+    // UPLOAD TO S3 (Version and ID)
+    const id: string = await uploadPackage(dir, Name);
 
     const result = {
         statusCode: 201,
@@ -258,11 +257,10 @@ async function contentExtract(content: string, dir: string, JSProgram: string, N
             metadata: {
                 Name: Name,
                 Version: "1.0.0",
-                ID: "1812719"
+                ID: id
             },
             data: {
-                Content: base64,
-                JSProgram: JSProgram
+                Content: base64
             }
         }
     };
@@ -272,13 +270,13 @@ async function contentExtract(content: string, dir: string, JSProgram: string, N
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", "null", false);
+    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
 
     console.log(result);
     
     try
     {
-        const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", "null", result.body.metadata.Name, false);
+        const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);
 
         console.log(result2);
     }

@@ -1,6 +1,5 @@
 import { Handler } from 'aws-lambda';
-
-const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
+import { checkValidVersion } from './s3_repo';
 
 const Err400 = {
     statusCode: 400,
@@ -45,21 +44,3 @@ export const handler: Handler = async (event, context) => {
 
     return result
 };
-
-function checkValidVersion(versionString: string): boolean
-{
-    const regex =  versionRegex.test(versionString);
-
-    const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
-
-    return regex && !isRangeWithCaretOrTilde;
-}
-
-// console.log(checkValidVersion("12.122.1"));
-// console.log(checkValidVersion("~3.4.11"));
-// console.log(checkValidVersion("^7.190.21"));
-// console.log(checkValidVersion("8.5.6-7.8.4"));
-// console.log(checkValidVersion("a8.5.6-7.8.4"));
-// console.log(checkValidVersion("^~8.5.6-7.8.4"));
-// console.log(checkValidVersion("^8.5.6-7.8.4"));
-// console.log(checkValidVersion("12.122.1.1"));

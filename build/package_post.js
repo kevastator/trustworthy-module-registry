@@ -57,8 +57,11 @@ const Err424 = {
 const handler = async (event, context) => {
     const url = event.URL;
     const content = event.Content;
-    const JS = event.JSProgram;
+    let JS = event.JSProgram;
     var debloat = event.debloat;
+    if (!JS) {
+        JS = "null";
+    }
     if (debloat == undefined) {
         debloat = false;
     }
@@ -204,14 +207,15 @@ async function contentExtract(content, dir, JSProgram, Name, debloat) {
     catch {
         return Err424;
     }
-    // TODO UPLOAD TO S3 (Version and ID)
+    // UPLOAD TO S3 (Version and ID)
+    const id = await (0, s3_repo_1.uploadPackage)(dir, Name);
     const result = {
         statusCode: 201,
         body: {
             metadata: {
                 Name: Name,
                 Version: "1.0.0",
-                ID: "1812719"
+                ID: id
             },
             data: {
                 Content: base64,

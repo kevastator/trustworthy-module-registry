@@ -29,6 +29,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadPackage = uploadPackage;
 exports.checkPrefixExists = checkPrefixExists;
 exports.reset = reset;
+exports.versionGreaterThan = versionGreaterThan;
+exports.checkValidVersion = checkValidVersion;
 const AWS = __importStar(require("aws-sdk"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs = __importStar(require("fs"));
@@ -104,12 +106,12 @@ async function getUniqueID(packageName) {
     }
     let max = 0;
     keys.forEach(key => {
-        let testNum = Number(key.split(delimeter)[2].replace(packageName, ""));
+        let testNum = Number(key.split(delimeter)[2].replace(packageName + "-", ""));
         if (testNum > max) {
             max = testNum;
         }
     });
-    return packageName + String(max + 1);
+    return packageName + "-" + String(max + 1);
 }
 async function checkPrefixExists(packageName) {
     const params = {
@@ -168,4 +170,28 @@ async function reset() {
     catch (err) {
         console.log(err);
     }
+}
+function versionGreaterThan(versionG, versionL) {
+    let versionG1 = Number(versionG.split(".")[0]);
+    let versionG2 = Number(versionG.split(".")[1]);
+    let versionG3 = Number(versionG.split(".")[2]);
+    let versionL1 = Number(versionL.split(".")[0]);
+    let versionL2 = Number(versionL.split(".")[1]);
+    let versionL3 = Number(versionL.split(".")[2]);
+    if (versionG1 > versionL1) {
+        return true;
+    }
+    else if (versionG2 > versionL2) {
+        return true;
+    }
+    else if (versionG3 > versionL3) {
+        return true;
+    }
+    return false;
+}
+function checkValidVersion(versionString) {
+    const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
+    const regex = versionRegex.test(versionString);
+    const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
+    return regex && !isRangeWithCaretOrTilde;
 }

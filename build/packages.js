@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
-const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
+const s3_repo_1 = require("./s3_repo");
 const Err400 = {
     statusCode: 400,
     body: {
@@ -11,7 +11,7 @@ const Err400 = {
 const handler = async (event, context) => {
     const Version = event.Version;
     const Name = event.Name;
-    if (Name == undefined || Version == undefined || !checkValidVersion(Version)) {
+    if (Name == undefined || Version == undefined || !(0, s3_repo_1.checkValidVersion)(Version)) {
         return Err400;
     }
     // TODO S3 RETRIEVAL IMPLIMENTATION
@@ -39,11 +39,6 @@ const handler = async (event, context) => {
     return result;
 };
 exports.handler = handler;
-function checkValidVersion(versionString) {
-    const regex = versionRegex.test(versionString);
-    const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
-    return regex && !isRangeWithCaretOrTilde;
-}
 // console.log(checkValidVersion("12.122.1"));
 // console.log(checkValidVersion("~3.4.11"));
 // console.log(checkValidVersion("^7.190.21"));

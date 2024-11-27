@@ -105,7 +105,7 @@ async function getUniqueID(packageName: string): Promise<string>
     let max: number = 0;
 
     keys.forEach(key => {
-        let testNum: number = Number(key.split(delimeter)[2].replace(packageName, ""));
+        let testNum: number = Number(key.split(delimeter)[2].replace(packageName + "-", ""));
 
         if (testNum > max)
         {
@@ -113,7 +113,7 @@ async function getUniqueID(packageName: string): Promise<string>
         }
     });
 
-    return packageName + String(max + 1);
+    return packageName + "-" + String(max + 1);
 }
 
 export async function checkPrefixExists(packageName: string): Promise<boolean>
@@ -199,4 +199,41 @@ export async function reset()
     {
         console.log(err);
     }
+}
+
+export function versionGreaterThan(versionG: string, versionL: string): boolean
+{
+    let versionG1: Number = Number(versionG.split(".")[0]);
+    let versionG2: Number = Number(versionG.split(".")[1]);
+    let versionG3: Number = Number(versionG.split(".")[2]);
+
+    let versionL1: Number = Number(versionL.split(".")[0]);
+    let versionL2: Number = Number(versionL.split(".")[1]);
+    let versionL3: Number = Number(versionL.split(".")[2]);
+
+    if (versionG1 > versionL1)
+    {
+        return true;
+    }
+    else if (versionG2 > versionL2)
+    {
+        return true;
+    }
+    else if (versionG3 > versionL3)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+export function checkValidVersion(versionString: string): boolean
+{
+    const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
+
+    const regex =  versionRegex.test(versionString);
+
+    const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
+
+    return regex && !isRangeWithCaretOrTilde;
 }
