@@ -30,7 +30,6 @@ const handler = async (event, context) => {
     if (searchResults.Content == "") {
         return Err404;
     }
-    // MOCK RETURN
     const result = {
         statusCode: 200,
         headers: {

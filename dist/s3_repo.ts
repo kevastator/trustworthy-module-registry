@@ -237,7 +237,8 @@ export async function getByID(packageID: string)
 
             if (data.Contents)
             {
-                data.Contents.forEach(async (object) => {
+                for (let object of data.Contents)
+                {
                     if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip")
                     {
                         const getObjectCommand: AWS.S3.GetObjectRequest = {
@@ -264,7 +265,7 @@ export async function getByID(packageID: string)
                             Version: object.Key?.split(delimeter)[1]
                         }
                     }
-                });
+                }
             }
 
             isTruncated = data.IsTruncated as boolean;

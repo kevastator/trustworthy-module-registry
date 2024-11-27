@@ -38,7 +38,6 @@ export const handler: Handler = async (event, context) => {
         return Err404;
     }
 
-    // MOCK RETURN
     const result = {
         statusCode: 200,
         headers: {

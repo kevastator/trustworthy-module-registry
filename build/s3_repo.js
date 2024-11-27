@@ -196,7 +196,7 @@ async function getByID(packageID) {
             }
             const data = await s3.listObjectsV2(params).promise();
             if (data.Contents) {
-                data.Contents.forEach(async (object) => {
+                for (let object of data.Contents) {
                     if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip") {
                         const getObjectCommand = {
                             Bucket: bucketName,
@@ -217,7 +217,7 @@ async function getByID(packageID) {
                             Version: object.Key?.split(delimeter)[1]
                         };
                     }
-                });
+                }
             }
             isTruncated = data.IsTruncated;
             continuationToken = data.NextContinuationToken;
