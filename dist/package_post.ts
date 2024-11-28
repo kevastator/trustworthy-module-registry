@@ -134,7 +134,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
         const packageJson = JSON.parse(packageData);
 
         // Check if the name and version are properly in the package json file to be uploaded
-        if ("name" in packageJson && "version" in packageJson && packageJson.name.includes("/") && checkValidVersion(packageJson.version))
+        if ("name" in packageJson && "version" in packageJson && !packageJson.name.includes("/") && checkValidVersion(packageJson.version))
         {
             Name = packageJson.name;
             version = packageJson.version;

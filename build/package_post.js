@@ -127,7 +127,7 @@ async function urlExtract(testurl, dir, debloat) {
         const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
         const packageJson = JSON.parse(packageData);
         // Check if the name and version are properly in the package json file to be uploaded
-        if ("name" in packageJson && "version" in packageJson && packageJson.name.includes("/") && (0, s3_repo_1.checkValidVersion)(packageJson.version)) {
+        if ("name" in packageJson && "version" in packageJson && !packageJson.name.includes("/") && (0, s3_repo_1.checkValidVersion)(packageJson.version)) {
             Name = packageJson.name;
             version = packageJson.version;
         }
