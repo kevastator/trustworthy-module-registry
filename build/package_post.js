@@ -100,7 +100,7 @@ async function urlExtract(testurl, dir, debloat) {
         return Err400;
     }
     // Convert to a valid repo and define the dir for the cloned repo
-    const validURL = await (0, rate_1.resolveNpmToGithub)(testurl);
+    let validURL = await (0, rate_1.resolveNpmToGithub)(testurl);
     // const urlStringList: string[] = testurl.split("/");
     // var Name: string = urlStringList[urlStringList.length - 1];
     // Name = Name[0].toUpperCase() + Name.slice(1);
@@ -118,6 +118,9 @@ async function urlExtract(testurl, dir, debloat) {
     var version = "";
     // Clone the repository
     try {
+        if (validURL.indexOf("git") == 0) {
+            validURL = "https" + validURL.slice(3);
+        }
         await git.clone({
             fs: fs_1.promises,
             http,
@@ -139,7 +142,8 @@ async function urlExtract(testurl, dir, debloat) {
             return Err400;
         }
     }
-    catch {
+    catch (err) {
+        console.log(err);
         return Err400;
     }
     // Use Archiver to create a zip file from this dir
@@ -267,7 +271,7 @@ async function contentExtract(content, dir, Name, debloat) {
     return result;
 }
 async function mainTest() {
-    const result = await urlExtract("https://www.npmjs.com/package/socket.io", "test/zipTest", false);
+    const result = await urlExtract("https://www.npmjs.com/package/karma", "test/zipTest", false);
     console.log(result);
     try {
         const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);

@@ -96,7 +96,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     }
 
     // Convert to a valid repo and define the dir for the cloned repo
-    const validURL: string = await resolveNpmToGithub(testurl);
+    let validURL: string = await resolveNpmToGithub(testurl);
 
     // const urlStringList: string[] = testurl.split("/");
     // var Name: string = urlStringList[urlStringList.length - 1];
@@ -122,6 +122,11 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     // Clone the repository
     try
     {
+        if (validURL.indexOf("git") == 0)
+        {
+            validURL = "https" + validURL.slice(3);
+        }
+
         await git.clone({
             fs,
             http,
@@ -149,8 +154,9 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
             return Err400;
         }
     }
-    catch
+    catch (err)
     {
+        console.log(err);
         return Err400;
     }
     
@@ -330,7 +336,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://www.npmjs.com/package/socket.io", "test/zipTest", false);
+    const result: any = await urlExtract("https://www.npmjs.com/package/karma", "test/zipTest", false);
 
     console.log(result);
     
