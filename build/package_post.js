@@ -33,6 +33,7 @@ const s3_repo_1 = require("./s3_repo");
 const fs_1 = require("fs");
 const archiver_1 = __importDefault(require("archiver"));
 const unzipper = __importStar(require("unzipper"));
+const path = __importStar(require("path"));
 const http = __importStar(require("isomorphic-git/http/node"));
 const git = __importStar(require("isomorphic-git"));
 const promises_1 = require("timers/promises");
@@ -172,6 +173,7 @@ async function urlExtract(testurl, dir, debloat) {
     }
     // S3 (Version and ID)
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name, version);
+    await deleteDirectory(dir);
     const result = {
         statusCode: 201,
         headers: {
@@ -252,6 +254,7 @@ async function contentExtract(content, dir, Name, debloat) {
     }
     // UPLOAD TO S3 (Version and ID)
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name, "1.0.0");
+    await deleteDirectory(dir);
     const result = {
         statusCode: 201,
         headers: {
@@ -270,8 +273,34 @@ async function contentExtract(content, dir, Name, debloat) {
     };
     return result;
 }
+async function deleteDirectory(directoryPath) {
+    try {
+        // Read the contents of the directory
+        const files = await fs_1.promises.readdir(directoryPath);
+        // Iterate through each item in the directory
+        for (const file of files) {
+            const filePath = path.join(directoryPath, file);
+            const stats = await fs_1.promises.stat(filePath);
+            if (stats.isDirectory()) {
+                // If it's a directory, recursively delete its contents
+                await deleteDirectory(filePath);
+            }
+            else {
+                // If it's a file, delete it
+                await fs_1.promises.unlink(filePath);
+                console.log(`Deleted file: ${filePath}`);
+            }
+        }
+        // After deleting all contents, remove the directory itself
+        await fs_1.promises.rmdir(directoryPath);
+        console.log(`Deleted directory: ${directoryPath}`);
+    }
+    catch (error) {
+        console.error('Error deleting directory:', error);
+    }
+}
 async function mainTest() {
-    const result = await urlExtract("https://www.npmjs.com/package/karma", "test/zipTest", false);
+    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
     console.log(result);
     try {
         const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);

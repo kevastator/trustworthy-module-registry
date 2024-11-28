@@ -200,6 +200,8 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     // S3 (Version and ID)
     const id: string = await uploadPackage(dir, Name, version);
 
+    await deleteDirectory(dir);
+
     const result = {
         statusCode: 201,
         headers: {
@@ -314,6 +316,8 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     // UPLOAD TO S3 (Version and ID)
     const id: string = await uploadPackage(dir, Name, "1.0.0");
 
+    await deleteDirectory(dir);
+
     const result = {
         statusCode: 201,
         headers: {
@@ -334,9 +338,38 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     return result
 }
 
+async function deleteDirectory(directoryPath: string): Promise<void> {
+    try {
+        // Read the contents of the directory
+        const files = await fs.readdir(directoryPath);
+
+        // Iterate through each item in the directory
+        for (const file of files) {
+            const filePath = path.join(directoryPath, file);
+            const stats = await fs.stat(filePath);
+
+            if (stats.isDirectory()) {
+                // If it's a directory, recursively delete its contents
+                await deleteDirectory(filePath);
+            } else {
+                // If it's a file, delete it
+                await fs.unlink(filePath);
+                console.log(`Deleted file: ${filePath}`);
+            }
+        }
+
+        // After deleting all contents, remove the directory itself
+        await fs.rmdir(directoryPath);
+        console.log(`Deleted directory: ${directoryPath}`);
+
+    } catch (error) {
+        console.error('Error deleting directory:', error);
+    }
+}
+
 async function mainTest()
 {
-    const result: any = await urlExtract("https://www.npmjs.com/package/karma", "test/zipTest", false);
+    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
 
     console.log(result);
     
