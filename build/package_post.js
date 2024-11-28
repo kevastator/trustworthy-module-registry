@@ -115,6 +115,7 @@ async function urlExtract(testurl, dir, debloat) {
         (0, fs_1.mkdirSync)(dir, { recursive: true });
     }
     var Name = "";
+    var version = "";
     // Clone the repository
     try {
         await git.clone({
@@ -125,8 +126,10 @@ async function urlExtract(testurl, dir, debloat) {
         });
         const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
         const packageJson = JSON.parse(packageData);
-        if ("name" in packageJson && !packageJson.name.includes("/")) {
+        // Check if the name and version are properly in the package json file to be uploaded
+        if ("name" in packageJson && "version" in packageJson && packageJson.name.includes("/") && (0, s3_repo_1.checkValidVersion)(packageJson.version)) {
             Name = packageJson.name;
+            version = packageJson.version;
         }
         else {
             return Err400;
@@ -160,7 +163,7 @@ async function urlExtract(testurl, dir, debloat) {
         return Err409;
     }
     // S3 (Version and ID)
-    const id = await (0, s3_repo_1.uploadPackage)(dir, Name);
+    const id = await (0, s3_repo_1.uploadPackage)(dir, Name, version);
     const result = {
         statusCode: 201,
         headers: {
@@ -240,7 +243,7 @@ async function contentExtract(content, dir, Name, debloat) {
         return Err409;
     }
     // UPLOAD TO S3 (Version and ID)
-    const id = await (0, s3_repo_1.uploadPackage)(dir, Name);
+    const id = await (0, s3_repo_1.uploadPackage)(dir, Name, "1.0.0");
     const result = {
         statusCode: 201,
         headers: {

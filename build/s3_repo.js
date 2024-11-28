@@ -32,6 +32,7 @@ exports.reset = reset;
 exports.getByID = getByID;
 exports.getRatingByID = getRatingByID;
 exports.versionGreaterThan = versionGreaterThan;
+exports.checkValidVersionRegex = checkValidVersionRegex;
 exports.checkValidVersion = checkValidVersion;
 const AWS = __importStar(require("aws-sdk"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -54,11 +55,11 @@ const s3 = new AWS.S3({
 const delimeter = "/";
 const bucketName = "trust-repository";
 const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter + "zip";
-async function uploadPackage(dir, name) {
+async function uploadPackage(dir, name, version) {
     try {
         const fileStreamZip = fs.createReadStream(dir + ".zip");
         const id = await getUniqueID(name);
-        const pathName = name + delimeter + "1.0.0" + delimeter + id;
+        const pathName = name + delimeter + version + delimeter + id;
         const paramsZip = {
             Bucket: bucketName,
             Key: pathName + delimeter + "zip", // The S3 key (file name) where you want to store the file
@@ -495,9 +496,14 @@ function versionGreaterThan(versionG, versionL) {
     }
     return false;
 }
-function checkValidVersion(versionString) {
+function checkValidVersionRegex(versionString) {
     const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
     const regex = versionRegex.test(versionString);
     const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
     return regex && !isRangeWithCaretOrTilde;
+}
+function checkValidVersion(versionString) {
+    const versionRegex = /^\d+\.\d+\.\d+$/;
+    const regex = versionRegex.test(versionString);
+    return regex;
 }

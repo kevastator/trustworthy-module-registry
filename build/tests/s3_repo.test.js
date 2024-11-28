@@ -24,24 +24,39 @@ describe("Version Testing", () => {
         expect((0, s3_repo_1.versionGreaterThan)("1.0.0", "1.0.12")).toBe(false);
     });
     it("Version 1.0.0 should be valid", () => {
-        expect((0, s3_repo_1.checkValidVersion)("1.0.0")).toBe(true);
+        expect((0, s3_repo_1.checkValidVersionRegex)("1.0.0")).toBe(true);
     });
     it("Version 12.122.1 should be valid", () => {
-        expect((0, s3_repo_1.checkValidVersion)("12.122.1")).toBe(true);
+        expect((0, s3_repo_1.checkValidVersionRegex)("12.122.1")).toBe(true);
     });
     it("Version ~3.4.11 should be valid", () => {
-        expect((0, s3_repo_1.checkValidVersion)("~3.4.11")).toBe(true);
+        expect((0, s3_repo_1.checkValidVersionRegex)("~3.4.11")).toBe(true);
     });
     it("Version ^7.190.21 should be valid", () => {
-        expect((0, s3_repo_1.checkValidVersion)("^7.190.21")).toBe(true);
+        expect((0, s3_repo_1.checkValidVersionRegex)("^7.190.21")).toBe(true);
     });
     it("Version 8.5.6-7.8.4 should be valid", () => {
-        expect((0, s3_repo_1.checkValidVersion)("8.5.6-7.8.4")).toBe(true);
+        expect((0, s3_repo_1.checkValidVersionRegex)("8.5.6-7.8.4")).toBe(true);
     });
     it("Version ~8.5.6-7.8.4 should be invalid", () => {
-        expect((0, s3_repo_1.checkValidVersion)("~8.5.6-7.8.4")).toBe(false);
+        expect((0, s3_repo_1.checkValidVersionRegex)("~8.5.6-7.8.4")).toBe(false);
     });
     it("Version 12.122.1.1 should be invalid", () => {
+        expect((0, s3_repo_1.checkValidVersionRegex)("12.122.1.1")).toBe(false);
+    });
+    it("Version 12.122.1.1 should be invalid (single version)", () => {
         expect((0, s3_repo_1.checkValidVersion)("12.122.1.1")).toBe(false);
+    });
+    it("Version ~8.5.6 should be invalid (single version)", () => {
+        expect((0, s3_repo_1.checkValidVersion)("~8.5.6")).toBe(false);
+    });
+    it("Version ^7.190.21 should be invalid (single version)", () => {
+        expect((0, s3_repo_1.checkValidVersion)("^7.190.21")).toBe(false);
+    });
+    it("Version 1.0.0 should be valid (single version)", () => {
+        expect((0, s3_repo_1.checkValidVersion)("1.0.0")).toBe(true);
+    });
+    it("Version 12.5.6 should be valid (single version)", () => {
+        expect((0, s3_repo_1.checkValidVersion)("12.5.6")).toBe(true);
     });
 });

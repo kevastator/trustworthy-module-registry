@@ -1,6 +1,6 @@
 import { isValidUrl, processURL, resolveNpmToGithub } from './rate';
 import { debloatPackage } from './debloat';
-import { uploadPackage, checkPrefixExists } from './s3_repo';
+import { uploadPackage, checkPrefixExists, checkValidVersion } from './s3_repo';
 import { promises as fs, readFileSync, existsSync, mkdirSync, createWriteStream, writeFile, writeFileSync, createReadStream } from 'fs';
 import archiver from 'archiver'
 import * as unzipper from 'unzipper'
@@ -117,6 +117,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     }
 
     var Name: string = "";
+    var version: string = "";
 
     // Clone the repository
     try
@@ -132,9 +133,11 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
 
         const packageJson = JSON.parse(packageData);
 
-        if ("name" in packageJson && !packageJson.name.includes("/"))
+        // Check if the name and version are properly in the package json file to be uploaded
+        if ("name" in packageJson && "version" in packageJson && packageJson.name.includes("/") && checkValidVersion(packageJson.version))
         {
             Name = packageJson.name;
+            version = packageJson.version;
         }
         else
         {
@@ -184,7 +187,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     }
 
     // S3 (Version and ID)
-    const id: string = await uploadPackage(dir, Name);
+    const id: string = await uploadPackage(dir, Name, version);
 
     const result = {
         statusCode: 201,
@@ -298,7 +301,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     }
 
     // UPLOAD TO S3 (Version and ID)
-    const id: string = await uploadPackage(dir, Name);
+    const id: string = await uploadPackage(dir, Name, "1.0.0");
 
     const result = {
         statusCode: 201,

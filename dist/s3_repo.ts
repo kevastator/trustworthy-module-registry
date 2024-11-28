@@ -25,7 +25,7 @@ const delimeter = "/";
 const bucketName = "trust-repository";
 const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter +  "zip";
 
-export async function uploadPackage(dir: string, name: string): Promise<string>
+export async function uploadPackage(dir: string, name: string, version: string): Promise<string>
 {
     try
     {
@@ -33,7 +33,7 @@ export async function uploadPackage(dir: string, name: string): Promise<string>
 
         const id: string = await getUniqueID(name);
 
-        const pathName: string = name + delimeter + "1.0.0" + delimeter + id;
+        const pathName: string = name + delimeter + version + delimeter + id;
     
         const paramsZip = {
             Bucket: bucketName,
@@ -609,7 +609,7 @@ export function versionGreaterThan(versionG: string, versionL: string): boolean
     return false;
 }
 
-export function checkValidVersion(versionString: string): boolean
+export function checkValidVersionRegex(versionString: string): boolean
 {
     const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
 
@@ -618,4 +618,13 @@ export function checkValidVersion(versionString: string): boolean
     const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
 
     return regex && !isRangeWithCaretOrTilde;
+}
+
+export function checkValidVersion(versionString: string): boolean
+{
+    const versionRegex = /^\d+\.\d+\.\d+$/;
+
+    const regex =  versionRegex.test(versionString);
+
+    return regex;
 }
