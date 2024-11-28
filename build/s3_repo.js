@@ -174,9 +174,88 @@ async function reset() {
     }
 }
 async function getByID(packageID) {
-    const lastUnder = packageID.lastIndexOf("-");
-    const packageName = packageID.slice(0, lastUnder);
-    if (lastUnder == -1) {
+    // const lastUnder: number = packageID.lastIndexOf("-");
+    // const packageName: string = packageID.slice(0, lastUnder);
+    // if (lastUnder == -1)
+    // {
+    //     return {
+    //         Content: "",
+    //         Name: "",
+    //         ID: "",
+    //         Version: ""
+    //     }
+    // }
+    // const params: AWS.S3.ListObjectsV2Request = {
+    //     Bucket: bucketName,
+    //     Prefix: packageName + "/",
+    // };
+    // let continuationToken: string | undefined = undefined;
+    // let isTruncated = true;  // To check if there are more objects to list
+    // while (isTruncated)
+    // {
+    //     try
+    //     {
+    //         if (continuationToken) {
+    //             params.ContinuationToken = continuationToken;  // Set continuation token for pagination
+    //         }
+    //         // Get object list
+    //         const data = await s3.listObjectsV2(params).promise();
+    //         if (data.Contents)
+    //         {
+    //             for (let object of data.Contents)
+    //             {
+    //                 if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip")
+    //                 {
+    //                     // Get the associated object and convert to base64
+    //                     const getObjectCommand: AWS.S3.GetObjectRequest = {
+    //                         Bucket: bucketName,
+    //                         Key: object.Key,
+    //                     };
+    //                     const obData = await s3.getObject(getObjectCommand).promise();
+    //                     const stream = obData.Body 
+    //                     const base64 = stream?.toString('base64');
+    //                     // Check if this needs a URL in it by getting the JSON file
+    //                     const getObjectJsonCommand: AWS.S3.GetObjectRequest = {
+    //                         Bucket: bucketName,
+    //                         Key: object.Key.slice(0, object.Key.lastIndexOf(delimeter)) + delimeter + "json",
+    //                     };
+    //                     const obJData = await s3.getObject(getObjectJsonCommand).promise();
+    //                     const streamJ = obJData.Body 
+    //                     const data = JSON.parse(streamJ?.toString('utf-8')!);
+    //                     // Format our results
+    //                     const result: any =  {
+    //                         Content: base64,
+    //                         Name: packageName,
+    //                         ID: packageID,
+    //                         Version: object.Key?.split(delimeter)[1]
+    //                     }
+    //                     // Add the URL if Needed
+    //                     if (!data.ByContent)
+    //                     {
+    //                         result.URL = data.URL;
+    //                     }
+    //                     // Return Result
+    //                     return result;
+    //                 }
+    //             }
+    //         }
+    //         isTruncated = data.IsTruncated as boolean;
+    //         continuationToken = data.NextContinuationToken;
+    //     }
+    //     catch (err)
+    //     {
+    //         console.log(err);
+    //         break;
+    //     }
+    // }
+    // return {
+    //     Content: "",
+    //     Name: "",
+    //     ID: "",
+    //     Version: ""
+    // }
+    const prefix = await getPrefixByID(packageID);
+    if (prefix == undefined) {
         return {
             Content: "",
             Name: "",
@@ -184,68 +263,37 @@ async function getByID(packageID) {
             Version: ""
         };
     }
-    const params = {
+    // Get the associated object and convert to base64
+    const getObjectCommand = {
         Bucket: bucketName,
-        Prefix: packageName + "/",
+        Key: prefix + delimeter + "zip",
     };
-    let continuationToken = undefined;
-    let isTruncated = true; // To check if there are more objects to list
-    while (isTruncated) {
-        try {
-            if (continuationToken) {
-                params.ContinuationToken = continuationToken; // Set continuation token for pagination
-            }
-            // Get object list
-            const data = await s3.listObjectsV2(params).promise();
-            if (data.Contents) {
-                for (let object of data.Contents) {
-                    if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip") {
-                        // Get the associated object and convert to base64
-                        const getObjectCommand = {
-                            Bucket: bucketName,
-                            Key: object.Key,
-                        };
-                        const obData = await s3.getObject(getObjectCommand).promise();
-                        const stream = obData.Body;
-                        const base64 = stream?.toString('base64');
-                        // Check if this needs a URL in it by getting the JSON file
-                        const getObjectJsonCommand = {
-                            Bucket: bucketName,
-                            Key: object.Key.slice(0, object.Key.lastIndexOf(delimeter)) + delimeter + "json",
-                        };
-                        const obJData = await s3.getObject(getObjectJsonCommand).promise();
-                        const streamJ = obJData.Body;
-                        const data = JSON.parse(streamJ?.toString('utf-8'));
-                        // Format our results
-                        const result = {
-                            Content: base64,
-                            Name: packageName,
-                            ID: packageID,
-                            Version: object.Key?.split(delimeter)[1]
-                        };
-                        // Add the URL if Needed
-                        if (!data.ByContent) {
-                            result.URL = data.URL;
-                        }
-                        // Return Result
-                        return result;
-                    }
-                }
-            }
-            isTruncated = data.IsTruncated;
-            continuationToken = data.NextContinuationToken;
-        }
-        catch (err) {
-            console.log(err);
-            break;
-        }
+    const obData = await s3.getObject(getObjectCommand).promise();
+    const stream = obData.Body;
+    const base64 = stream?.toString('base64');
+    // Check if this needs a URL in it by getting the JSON file
+    const getObjectJsonCommand = {
+        Bucket: bucketName,
+        Key: prefix + delimeter + "json",
+    };
+    const obJData = await s3.getObject(getObjectJsonCommand).promise();
+    const streamJ = obJData.Body;
+    const data = JSON.parse(streamJ?.toString('utf-8'));
+    const lastUnder = packageID.lastIndexOf("-");
+    const packageName = packageID.slice(0, lastUnder);
+    // Format our results
+    const result = {
+        Content: base64,
+        Name: packageName,
+        ID: packageID,
+        Version: prefix.split(delimeter)[1]
+    };
+    // Add the URL if Needed
+    if (!data.ByContent) {
+        result.URL = data.URL;
     }
-    return {
-        Content: "",
-        Name: "",
-        ID: "",
-        Version: ""
-    };
+    // Return Result
+    return result;
 }
 async function getRatingByID(packageID) {
     // const lastUnder: number = packageID.lastIndexOf("-");
