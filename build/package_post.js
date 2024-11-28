@@ -131,6 +131,10 @@ async function urlExtract(testurl, dir, debloat) {
             Name = packageJson.name;
             version = packageJson.version;
         }
+        else if ("name" in packageJson && !packageJson.name.includes("/")) {
+            Name = packageJson.name;
+            version = "1.0.0";
+        }
         else {
             return Err400;
         }
@@ -263,7 +267,7 @@ async function contentExtract(content, dir, Name, debloat) {
     return result;
 }
 async function mainTest() {
-    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
+    const result = await urlExtract("https://www.npmjs.com/package/socket.io", "test/zipTest", false);
     console.log(result);
     try {
         const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);

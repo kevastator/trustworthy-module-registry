@@ -139,6 +139,11 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
             Name = packageJson.name;
             version = packageJson.version;
         }
+        else if ("name" in packageJson && !packageJson.name.includes("/"))
+        {
+            Name = packageJson.name;
+            version = "1.0.0";
+        }
         else
         {
             return Err400;
@@ -325,7 +330,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
+    const result: any = await urlExtract("https://www.npmjs.com/package/socket.io", "test/zipTest", false);
 
     console.log(result);
     
