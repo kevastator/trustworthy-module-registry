@@ -286,19 +286,18 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         {
             return Err424;
         }
-
-        // Debloat the package if true
-        debloatPackage(zipFileDir, debloat);
-
-        const zipBufferd = readFileSync(zipFileDir);
-
-        var base64 = zipBufferd.toString('base64');
     }
     catch
     {
         return Err424;
     }
-    
+
+    // Debloat the package if true
+    debloatPackage(zipFileDir, debloat);
+
+    const zipBufferd = readFileSync(zipFileDir);
+
+    var base64 = zipBufferd.toString('base64');
 
     // Send Rating to json
     rating.Cost = zipBuffer.byteLength / 1000000;
@@ -369,7 +368,7 @@ async function deleteDirectory(directoryPath: string): Promise<void> {
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
+    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", true);
 
     console.log(result);
     

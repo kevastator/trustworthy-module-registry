@@ -235,14 +235,14 @@ async function contentExtract(content, dir, Name, debloat) {
         if (rating.NetScore < 0.5) {
             return Err424;
         }
-        // Debloat the package if true
-        (0, debloat_1.debloatPackage)(zipFileDir, debloat);
-        const zipBufferd = (0, fs_1.readFileSync)(zipFileDir);
-        var base64 = zipBufferd.toString('base64');
     }
     catch {
         return Err424;
     }
+    // Debloat the package if true
+    (0, debloat_1.debloatPackage)(zipFileDir, debloat);
+    const zipBufferd = (0, fs_1.readFileSync)(zipFileDir);
+    var base64 = zipBufferd.toString('base64');
     // Send Rating to json
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = true;
@@ -300,7 +300,7 @@ async function deleteDirectory(directoryPath) {
     }
 }
 async function mainTest() {
-    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", false);
+    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", true);
     console.log(result);
     try {
         const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);
