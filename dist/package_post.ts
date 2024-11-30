@@ -1,7 +1,7 @@
 import { isValidUrl, processURL, resolveNpmToGithub } from './rate';
 import { debloatPackage } from './debloat';
 import { uploadPackage, checkPrefixExists, checkValidVersion } from './s3_repo';
-import { promises as fs, readFileSync, existsSync, mkdirSync, createWriteStream, writeFile, writeFileSync, createReadStream } from 'fs';
+import { promises as fs, readFileSync, existsSync, mkdirSync, mkdtempSync, createWriteStream, writeFile, writeFileSync, createReadStream } from 'fs';
 import archiver from 'archiver'
 import * as unzipper from 'unzipper'
 import { Handler } from 'aws-lambda';
@@ -75,7 +75,7 @@ export const handler: Handler = async (event, context) => {
         // URL Proceedure
         if (url != undefined)
         {  
-            return urlExtract(url, "/tmp/repo", debloat);
+            return urlExtract(url, mkdtempSync("/tmp/repo/"), debloat);
         }
         // Content Proceedure
         else
@@ -88,7 +88,7 @@ export const handler: Handler = async (event, context) => {
                 return Err400;
             }
 
-            return contentExtract(content, "/tmp/repo", Name, debloat);
+            return contentExtract(content, mkdtempSync("/tmp/repo/"), Name, debloat);
         }
     }
     catch

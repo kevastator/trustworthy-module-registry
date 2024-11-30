@@ -84,7 +84,7 @@ const handler = async (event, context) => {
     try {
         // URL Proceedure
         if (url != undefined) {
-            return urlExtract(url, "/tmp/repo", debloat);
+            return urlExtract(url, (0, fs_1.mkdtempSync)("/tmp/repo/"), debloat);
         }
         // Content Proceedure
         else {
@@ -93,7 +93,7 @@ const handler = async (event, context) => {
             if (Name == undefined || Name.includes("/")) {
                 return Err400;
             }
-            return contentExtract(content, "/tmp/repo", Name, debloat);
+            return contentExtract(content, (0, fs_1.mkdtempSync)("/tmp/repo/"), Name, debloat);
         }
     }
     catch {
