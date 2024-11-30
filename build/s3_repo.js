@@ -73,6 +73,18 @@ async function uploadPackage(dir, name, version) {
             Body: fileStreamJson
         };
         const uploadResultJson = await s3.upload(paramsJson).promise();
+        try {
+            const fileStreamRead = fs.createReadStream(dir + "/README.md");
+            const paramsRead = {
+                Bucket: bucketName,
+                Key: pathName + delimeter + "READ", // The S3 key (file name) where you want to store the file
+                Body: fileStreamRead
+            };
+            const uploadResultRead = await s3.upload(paramsRead).promise();
+        }
+        catch {
+            // Nothing Right Now
+        }
         return id;
     }
     catch (err) {

@@ -65,7 +65,13 @@ const Err424 = {
     })
 };
 const handler = async (event, context) => {
-    const body = JSON.parse(event.body);
+    let body = undefined;
+    try {
+        body = JSON.parse(event.body);
+    }
+    catch {
+        return Err400;
+    }
     const url = body.URL;
     const content = body.Content;
     var debloat = body.debloat;
@@ -140,11 +146,13 @@ async function urlExtract(testurl, dir, debloat) {
             version = "1.0.0";
         }
         else {
+            await deleteDirectory(dir);
             return Err400;
         }
     }
     catch (err) {
         console.log(err);
+        await deleteDirectory(dir);
         return Err400;
     }
     // Use Archiver to create a zip file from this dir
@@ -169,6 +177,7 @@ async function urlExtract(testurl, dir, debloat) {
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
     if (prefixCheck) {
+        await deleteDirectory(dir);
         return Err409;
     }
     // S3 (Version and ID)
@@ -206,6 +215,8 @@ async function contentExtract(content, dir, Name, debloat) {
     // Unzip the file
     const extractDir = await unzipper.Open.file(zipFileDir);
     extractDir.extract({ path: dir });
+    // Wait 10 ms for finalize and convert to base64
+    await (0, promises_1.setTimeout)(100);
     // Rate and Pass
     try {
         const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
@@ -226,6 +237,7 @@ async function contentExtract(content, dir, Name, debloat) {
         }
         // Disqualify Based on no URL present
         if (testurl == "") {
+            await deleteDirectory(dir);
             return Err424;
         }
         // Convert to a valid repo and define the dir for the cloned repo
@@ -233,10 +245,12 @@ async function contentExtract(content, dir, Name, debloat) {
         // Rate Package
         var rating = await (0, rate_1.processURL)(validURL);
         if (rating.NetScore < 0.5) {
+            await deleteDirectory(dir);
             return Err424;
         }
     }
     catch {
+        await deleteDirectory(dir);
         return Err424;
     }
     // Debloat the package if true
@@ -250,6 +264,7 @@ async function contentExtract(content, dir, Name, debloat) {
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
     if (prefixCheck) {
+        await deleteDirectory(dir);
         return Err409;
     }
     // UPLOAD TO S3 (Version and ID)
@@ -288,7 +303,6 @@ async function deleteDirectory(directoryPath) {
             else {
                 // If it's a file, delete it
                 await fs_1.promises.unlink(filePath);
-                console.log(`Deleted file: ${filePath}`);
             }
         }
         // After deleting all contents, remove the directory itself
@@ -300,13 +314,15 @@ async function deleteDirectory(directoryPath) {
     }
 }
 async function mainTest() {
-    const result = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", true);
+    const result = await urlExtract("https://www.npmjs.com/package/webpack-hot-middleware", "test/zipTest", false);
     console.log(result);
     try {
-        const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);
+        const body = JSON.parse(result.body);
+        const result2 = await contentExtract(body.data.Content, "test/zipTest2", body.metadata.Name, false);
         console.log(result2);
     }
-    catch {
+    catch (err) {
+        console.log(err);
         console.log("Loopback could not be performed due to no content generated");
     }
 }

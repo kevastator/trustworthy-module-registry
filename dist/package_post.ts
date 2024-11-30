@@ -44,7 +44,17 @@ const Err424 = {
 };
 
 export const handler: Handler = async (event, context) => {
-    const body = JSON.parse(event.body); 
+    let body = undefined;
+    
+    try
+    {
+        body = JSON.parse(event.body); 
+    }
+    catch
+    {
+        return Err400;
+    }
+    
     
     const url = body.URL;
     const content = body.Content;
@@ -151,12 +161,14 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
         }
         else
         {
+            await deleteDirectory(dir);
             return Err400;
         }
     }
     catch (err)
     {
         console.log(err);
+        await deleteDirectory(dir);
         return Err400;
     }
     
@@ -194,6 +206,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     const prefixCheck = await checkPrefixExists(Name);
     if (prefixCheck)
     {
+        await deleteDirectory(dir);
         return Err409;
     }
 
@@ -241,6 +254,9 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     // Unzip the file
     const extractDir = await unzipper.Open.file(zipFileDir);
     extractDir.extract({ path: dir });
+
+    // Wait 10 ms for finalize and convert to base64
+    await setTimeout(100);
     
     // Rate and Pass
     try
@@ -273,6 +289,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         // Disqualify Based on no URL present
         if (testurl == "")
         {
+            await deleteDirectory(dir);
             return Err424;
         }
 
@@ -284,11 +301,13 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
         if (rating.NetScore < 0.5)
         {
+            await deleteDirectory(dir);
             return Err424;
         }
     }
     catch
     {
+        await deleteDirectory(dir);
         return Err424;
     }
 
@@ -309,6 +328,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     const prefixCheck = await checkPrefixExists(Name);
     if (prefixCheck)
     {
+        await deleteDirectory(dir);
         return Err409;
     }
 
@@ -353,7 +373,6 @@ async function deleteDirectory(directoryPath: string): Promise<void> {
             } else {
                 // If it's a file, delete it
                 await fs.unlink(filePath);
-                console.log(`Deleted file: ${filePath}`);
             }
         }
 
@@ -368,18 +387,20 @@ async function deleteDirectory(directoryPath: string): Promise<void> {
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://github.com/kevastator/461-acme-service", "test/zipTest", true);
+    const result: any = await urlExtract("https://www.npmjs.com/package/webpack-hot-middleware", "test/zipTest", false);
 
     console.log(result);
     
     try
     {
-        const result2 = await contentExtract(result.body.data.Content, "test/zipTest2", result.body.metadata.Name, false);
+        const body = JSON.parse(result.body);
+        const result2 = await contentExtract(body.data.Content, "test/zipTest2", body.metadata.Name, false);
 
         console.log(result2);
     }
-    catch
+    catch (err)
     {
+        console.log(err);
         console.log("Loopback could not be performed due to no content generated");
     }
 }
