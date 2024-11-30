@@ -114,7 +114,7 @@ async function urlExtract(testurl, dir, debloat) {
     // Rate Package
     let rating = await (0, rate_1.processURL)(validURL);
     const ratedResult = rating.NetScore;
-    if (ratedResult < 0.5) {
+    if (ratedResult <= 0.5) {
         return Err424;
     }
     // Ensure the directory exists
@@ -244,7 +244,7 @@ async function contentExtract(content, dir, Name, debloat) {
         const validURL = await (0, rate_1.resolveNpmToGithub)(testurl);
         // Rate Package
         var rating = await (0, rate_1.processURL)(validURL);
-        if (rating.NetScore < 0.5) {
+        if (rating.NetScore <= 0.5) {
             await deleteDirectory(dir);
             return Err424;
         }

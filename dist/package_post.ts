@@ -116,7 +116,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     let rating: any = await processURL(validURL);
     const ratedResult: number = (rating as { NetScore:number }).NetScore;
 
-    if (ratedResult < 0.5)
+    if (ratedResult <= 0.5)
     {
         return Err424;
     }
@@ -299,7 +299,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         // Rate Package
         var rating: any = await processURL(validURL);
 
-        if (rating.NetScore < 0.5)
+        if (rating.NetScore <= 0.5)
         {
             await deleteDirectory(dir);
             return Err424;
