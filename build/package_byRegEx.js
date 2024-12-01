@@ -1,44 +1,48 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
+const s3_repo_1 = require("./s3_repo");
 const Err400 = {
     statusCode: 400,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid"
-    }
+    })
 };
 const Err404 = {
     statusCode: 404,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "No package found under this regex."
-    }
+    })
 };
 const handler = async (event, context) => {
-    const RegEx = event.RegEx;
+    let body = undefined;
+    try {
+        body = JSON.parse(event.body);
+    }
+    catch {
+        return Err400;
+    }
+    const RegEx = body.RegEx;
     if (RegEx == undefined) {
         return Err400;
     }
-    //TODO SEARCH BY PACKAGE REGEX (RETURN 404 IF NOT FOUND)
-    // MOCK RETURN
+    // Search S3 using the Regex Array
+    const foundObjects = await (0, s3_repo_1.getRegexArray)(RegEx);
+    if (foundObjects.length == 0) {
+        return Err404;
+    }
     const result = {
         statusCode: 200,
-        body: [
-            {
-                Version: "1.2.3",
-                Name: "Underscore",
-                ID: "17621"
-            },
-            {
-                Version: "1.2.3",
-                Name: "Lodash",
-                ID: "91273"
-            },
-            {
-                Version: "1.2.3",
-                Name: "React",
-                ID: "71283"
-            }
-        ]
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(foundObjects)
     };
     return result;
 };

@@ -1,4 +1,4 @@
-import { versionGreaterThan, checkValidVersionRegex, checkValidVersion } from "../s3_repo";
+import { versionGreaterThan, checkValidVersionRegex, checkValidVersion, versionQualifyCheck } from "../s3_repo";
 
 describe("Version Testing", () => {
     it ("Version 2.0.0 should be greater than 1.0.0", () => {
@@ -75,5 +75,37 @@ describe("Version Testing", () => {
 
     it ("Version 12.5.6 should be valid (single version)", () => {
         expect(checkValidVersion("12.5.6")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should qualify for (3.1.2)", () => {
+        expect(versionQualifyCheck("3.1.2", "3.1.2")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should qualify for (1.0.0-4.0.0)", () => {
+        expect(versionQualifyCheck("1.0.0-4.0.0", "3.1.2")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should qualify for (^3.1.2)", () => {
+        expect(versionQualifyCheck("^3.1.2", "3.1.2")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should qualify for (~3.1.2)", () => {
+        expect(versionQualifyCheck("~3.1.2", "3.1.2")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should qualify for (~3.1.1)", () => {
+        expect(versionQualifyCheck("~3.1.1", "3.1.2")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should qualify for (^3.0.1)", () => {
+        expect(versionQualifyCheck("^3.0.1", "3.1.2")).toBe(true);
+    });
+
+    it ("Version 3.1.2 should not qualify for (1.0.0-3.0.0)", () => {
+        expect(versionQualifyCheck("1.0.0-3.0.0", "3.1.2")).toBe(false);
+    });
+
+    it ("Version 3.1.2 should qualify for (1.0.0-3.1.2)", () => {
+        expect(versionQualifyCheck("1.0.0-3.1.2", "3.1.2")).toBe(true);
     });
 });

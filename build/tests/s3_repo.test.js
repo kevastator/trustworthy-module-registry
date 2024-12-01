@@ -59,4 +59,28 @@ describe("Version Testing", () => {
     it("Version 12.5.6 should be valid (single version)", () => {
         expect((0, s3_repo_1.checkValidVersion)("12.5.6")).toBe(true);
     });
+    it("Version 3.1.2 should qualify for (3.1.2)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("3.1.2", "3.1.2")).toBe(true);
+    });
+    it("Version 3.1.2 should qualify for (1.0.0-4.0.0)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("1.0.0-4.0.0", "3.1.2")).toBe(true);
+    });
+    it("Version 3.1.2 should qualify for (^3.1.2)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("^3.1.2", "3.1.2")).toBe(true);
+    });
+    it("Version 3.1.2 should qualify for (~3.1.2)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("~3.1.2", "3.1.2")).toBe(true);
+    });
+    it("Version 3.1.2 should qualify for (~3.1.1)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("~3.1.1", "3.1.2")).toBe(true);
+    });
+    it("Version 3.1.2 should qualify for (^3.0.1)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("^3.0.1", "3.1.2")).toBe(true);
+    });
+    it("Version 3.1.2 should not qualify for (1.0.0-3.0.0)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("1.0.0-3.0.0", "3.1.2")).toBe(false);
+    });
+    it("Version 3.1.2 should qualify for (1.0.0-3.1.2)", () => {
+        expect((0, s3_repo_1.versionQualifyCheck)("1.0.0-3.1.2", "3.1.2")).toBe(true);
+    });
 });

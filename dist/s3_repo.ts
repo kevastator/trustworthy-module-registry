@@ -65,9 +65,9 @@ export async function uploadPackage(dir: string, name: string, version: string):
         
             const uploadResultRead = await s3.upload(paramsRead).promise();
         }
-        catch
+        catch (err)
         {
-            // Nothing Right Now
+            console.log(err);
         }
 
         return id;
@@ -600,6 +600,88 @@ async function getPrefixByID(packageID: string)
     return undefined;
 }
 
+export async function getRegexArray(regexString: string): Promise<object[]>
+{
+    let regexOb = RegExp(regexString);
+
+    const params: AWS.S3.ListObjectsV2Request = {
+        Bucket: bucketName
+    };
+
+    let continuationToken: string | undefined = undefined;
+
+    let isTruncated = true;  // To check if there are more objects to list
+
+    let returnArray: object[] = [];
+
+    while (isTruncated)
+    {
+        try
+        {
+            if (continuationToken) {
+                params.ContinuationToken = continuationToken;  // Set continuation token for pagination
+            }
+
+            const data = await s3.listObjectsV2(params).promise();
+
+            if (data.Contents)
+            {
+                for (let object of data.Contents)
+                {
+                    if (regexOb.test(object.Key?.split(delimeter)[0]!))
+                    {
+                        returnArray.push({
+                            Version: object.Key?.split(delimeter)[1],
+                            Name: object.Key?.split(delimeter)[0],
+                            ID: object.Key?.split(delimeter)[2],
+                        });
+                    }
+                    else
+                    {
+                        const testPrefix = object.Key?.slice(0, object.Key?.lastIndexOf(delimeter))
+
+                        const getObjectREADCommand: AWS.S3.GetObjectRequest = {
+                            Bucket: bucketName,
+                            Key: testPrefix + delimeter + "READ",
+                        };
+
+                        try
+                        {
+                            const obData = await s3.getObject(getObjectREADCommand).promise();
+
+                            const stream = obData.Body 
+
+                            const readMeBody: string = stream?.toString('utf-8')!;
+
+                            if (regexOb.test(readMeBody))
+                            {
+                                returnArray.push({
+                                    Version: object.Key?.split(delimeter)[1],
+                                    Name: object.Key?.split(delimeter)[0],
+                                    ID: object.Key?.split(delimeter)[2],
+                                });
+                            }
+                        }
+                        catch
+                        {
+                            // READ Me does not exist for this repo so we don't care!
+                        }
+                    }
+                }
+            }
+
+            isTruncated = data.IsTruncated as boolean;
+            continuationToken = data.NextContinuationToken;
+        }
+        catch (err)
+        {
+            console.log(err);
+        }
+    }
+
+    return returnArray;
+}
+
 export function versionGreaterThan(versionG: string, versionL: string): boolean
 {
     let versionG1: Number = Number(versionG.split(".")[0]);
@@ -614,11 +696,11 @@ export function versionGreaterThan(versionG: string, versionL: string): boolean
     {
         return true;
     }
-    else if (versionG2 > versionL2)
+    else if (versionG2 > versionL2 && versionG1 == versionL1)
     {
         return true;
     }
-    else if (versionG3 > versionL3)
+    else if (versionG3 > versionL3 && versionG1 == versionL1 && versionG2 == versionL2)
     {
         return true;
     }
@@ -644,4 +726,53 @@ export function checkValidVersion(versionString: string): boolean
     const regex =  versionRegex.test(versionString);
 
     return regex;
+}
+
+export function versionQualifyCheck(versionTester: string, version: string): boolean
+{
+    if (versionTester.includes("-"))
+    {
+        // Check version within range
+
+        let lowerBound: string = versionTester.split("-")[0];
+        let upperBound: string = versionTester.split("-")[1];
+
+        return (version == lowerBound ||version == upperBound || (versionGreaterThan(version, lowerBound) && !versionGreaterThan(version, upperBound)));
+    }
+    else if (versionTester.includes("^"))
+    {
+        // Check version carat notation
+
+        versionTester = versionTester.replace("^", "");
+
+        let versionT1: Number = Number(versionTester.split(".")[0]);
+        let versionT2: Number = Number(versionTester.split(".")[1]);
+        let versionT3: Number = Number(versionTester.split(".")[1]);
+
+        let version1: Number = Number(version.split(".")[0]);
+        let version2: Number = Number(version.split(".")[1]);
+        let version3: Number = Number(version.split(".")[1]);
+        
+        return (versionT1 == version1 && versionT2 <= version2 && (versionT3 <= version3 || versionT2 < version2));
+    }
+    else if (versionTester.includes("~"))
+    {
+        // Check version tilde notation
+
+        versionTester = versionTester.replace("~", "");
+
+        let versionT1: Number = Number(versionTester.split(".")[0]);
+        let versionT2: Number = Number(versionTester.split(".")[1]);
+        let versionT3: Number = Number(versionTester.split(".")[1]);
+
+        let version1: Number = Number(version.split(".")[0]);
+        let version2: Number = Number(version.split(".")[1]);
+        let version3: Number = Number(version.split(".")[1]);
+        
+        return (versionT1 == version1 && versionT2 == version2 && versionT3 <= version3);
+    }
+    else
+    {
+        return version == versionTester;
+    }
 }

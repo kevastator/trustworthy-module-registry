@@ -191,7 +191,7 @@ async function urlExtract(testurl, dir, debloat) {
         body: JSON.stringify({
             metadata: {
                 Name: Name,
-                Version: "1.0.0",
+                Version: version,
                 ID: id
             },
             data: {
@@ -314,7 +314,7 @@ async function deleteDirectory(directoryPath) {
     }
 }
 async function mainTest() {
-    const result = await urlExtract("https://www.npmjs.com/package/webpack-hot-middleware", "test/zipTest", false);
+    const result = await urlExtract("https://www.npmjs.com/package/react-hot-toast", "test/zipTest", false);
     console.log(result);
     try {
         const body = JSON.parse(result.body);
