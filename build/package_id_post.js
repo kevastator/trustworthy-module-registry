@@ -93,13 +93,14 @@ const handler = async (event, context) => {
     //const id = body.metadata.ID;
     const Version = body.metadata.Version;
     const Name = body.metadata.Name;
+    const metaID = body.metadata.ID;
     const URL = body.data.URL;
     const Content = body.data.Content;
     var debloat = body.data.debloat;
     if (debloat == undefined) {
         debloat = false;
     }
-    if ((URL == undefined && Content == undefined) || (URL != undefined && Content != undefined) || ID == undefined || !(0, s3_repo_1.checkValidVersion)(Version)) {
+    if ((URL == undefined && Content == undefined) || (URL != undefined && Content != undefined) || ID == undefined || !(0, s3_repo_1.checkValidVersion)(Version) || metaID != ID) {
         return Err400;
     }
     const versionExistCheck = await (0, s3_repo_1.checkPrefixExists)(Name + s3_repo_1.delimeter + Version);

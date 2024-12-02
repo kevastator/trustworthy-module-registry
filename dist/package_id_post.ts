@@ -78,6 +78,7 @@ export const handler: Handler = async (event, context) => {
     //const id = body.metadata.ID;
     const Version = body.metadata.Version;
     const Name = body.metadata.Name;
+    const metaID = body.metadata.ID;
 
     const URL = body.data.URL;
     const Content = body.data.Content;
@@ -88,7 +89,7 @@ export const handler: Handler = async (event, context) => {
         debloat = false;
     }
 
-    if ((URL == undefined && Content == undefined) || (URL != undefined && Content != undefined) || ID == undefined || !checkValidVersion(Version))
+    if ((URL == undefined && Content == undefined) || (URL != undefined && Content != undefined) || ID == undefined || !checkValidVersion(Version) || metaID != ID)
     {
         return Err400;
     }
