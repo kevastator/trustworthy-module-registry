@@ -508,33 +508,35 @@ async function getRegexArray(regexString) {
             const data = await s3.listObjectsV2(params).promise();
             if (data.Contents) {
                 for (let object of data.Contents) {
-                    if (regexOb.test(object.Key?.split(delimeter)[0])) {
-                        returnArray.push({
-                            Version: object.Key?.split(delimeter)[1],
-                            Name: object.Key?.split(delimeter)[0],
-                            ID: object.Key?.split(delimeter)[2],
-                        });
-                    }
-                    else {
-                        const testPrefix = object.Key?.slice(0, object.Key?.lastIndexOf(delimeter));
-                        const getObjectREADCommand = {
-                            Bucket: bucketName,
-                            Key: testPrefix + delimeter + "READ",
-                        };
-                        try {
-                            const obData = await s3.getObject(getObjectREADCommand).promise();
-                            const stream = obData.Body;
-                            const readMeBody = stream?.toString('utf-8');
-                            if (regexOb.test(readMeBody)) {
-                                returnArray.push({
-                                    Version: object.Key?.split(delimeter)[1],
-                                    Name: object.Key?.split(delimeter)[0],
-                                    ID: object.Key?.split(delimeter)[2],
-                                });
-                            }
+                    if (object.Key?.split(delimeter)[3] == "zip") {
+                        if (regexOb.test(object.Key?.split(delimeter)[0])) {
+                            returnArray.push({
+                                Version: object.Key?.split(delimeter)[1],
+                                Name: object.Key?.split(delimeter)[0],
+                                ID: object.Key?.split(delimeter)[2],
+                            });
                         }
-                        catch {
-                            // READ Me does not exist for this repo so we don't care!
+                        else {
+                            const testPrefix = object.Key?.slice(0, object.Key?.lastIndexOf(delimeter));
+                            const getObjectREADCommand = {
+                                Bucket: bucketName,
+                                Key: testPrefix + delimeter + "READ",
+                            };
+                            try {
+                                const obData = await s3.getObject(getObjectREADCommand).promise();
+                                const stream = obData.Body;
+                                const readMeBody = stream?.toString('utf-8');
+                                if (regexOb.test(readMeBody)) {
+                                    returnArray.push({
+                                        Version: object.Key?.split(delimeter)[1],
+                                        Name: object.Key?.split(delimeter)[0],
+                                        ID: object.Key?.split(delimeter)[2],
+                                    });
+                                }
+                            }
+                            catch {
+                                // READ Me does not exist for this repo so we don't care!
+                            }
                         }
                     }
                 }
