@@ -22,15 +22,22 @@ if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY)
 const s3 = new AWS.S3({
     signatureVersion: 'v4'
 });
-const delimeter = "/";
+export const delimeter = "/";
 const bucketName = "trust-repository";
 const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter +  "zip";
 
-export async function uploadPackage(dir: string, name: string, version: string): Promise<string>
+export async function uploadPackage(dir: string, name: string, version: string, debloat: boolean): Promise<string>
 {
     try
     {
-        const fileStreamZip = fs.createReadStream(dir + ".zip");
+        if (debloat)
+        {
+            var fileStreamZip = fs.createReadStream(dir + "-debloated.zip");
+        }
+        else
+        {
+            var fileStreamZip = fs.createReadStream(dir + ".zip");
+        }
 
         const id: string = await getUniqueID(name);
 
@@ -341,7 +348,7 @@ export async function getByID(packageID: string)
 
     const obData = await s3.getObject(getObjectCommand).promise();
 
-    const stream = obData.Body 
+    const stream = obData.Body;
     
     const base64 = stream?.toString('base64');
 
@@ -353,7 +360,7 @@ export async function getByID(packageID: string)
 
     const obJData = await s3.getObject(getObjectJsonCommand).promise();
     
-    const streamJ = obJData.Body 
+    const streamJ = obJData.Body;
     
     const data = JSON.parse(streamJ?.toString('utf-8')!);
 
@@ -548,6 +555,29 @@ export async function getRatingByID(packageID: string)
     }
 }
 
+export async function checkIfUploadByContent(packageID: string): Promise<boolean>
+{
+    const prefix = await getPrefixByID(packageID);
+
+    if (prefix == undefined)
+    {
+        return false
+    }
+
+    const getObjectJsonCommand: AWS.S3.GetObjectRequest = {
+        Bucket: bucketName,
+        Key: prefix + delimeter + "json",
+    };
+
+    const obJData = await s3.getObject(getObjectJsonCommand).promise();
+    
+    const streamJ = obJData.Body;
+    
+    const data = JSON.parse(streamJ?.toString('utf-8')!);
+
+    return data.ByContent;
+}
+
 async function getPrefixByID(packageID: string)
 {
     const lastUnder: number = packageID.lastIndexOf("-");
@@ -599,6 +629,30 @@ async function getPrefixByID(packageID: string)
     }
 
     return undefined;
+}
+
+export async function getPrefixParamsByID(packageID: string)
+{
+    const prefix: string | undefined = await getPrefixByID(packageID);
+
+    if (prefix == undefined)
+    {
+        return {
+            Name: "",
+            Version: "",
+            ID: ""
+        };
+    }
+    else
+    {
+        const prefixArray: string[] = prefix.split(delimeter);
+
+        return {
+            Name: prefixArray[0],
+            Version: prefixArray[1],
+            ID: prefixArray[2]
+        };
+    }
 }
 
 export async function getRegexArray(regexOb: RegExp): Promise<object[]>

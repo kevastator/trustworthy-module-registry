@@ -26,11 +26,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.delimeter = void 0;
 exports.uploadPackage = uploadPackage;
 exports.checkPrefixExists = checkPrefixExists;
 exports.reset = reset;
 exports.getByID = getByID;
 exports.getRatingByID = getRatingByID;
+exports.checkIfUploadByContent = checkIfUploadByContent;
+exports.getPrefixParamsByID = getPrefixParamsByID;
 exports.getRegexArray = getRegexArray;
 exports.versionGreaterThan = versionGreaterThan;
 exports.checkValidVersionRegex = checkValidVersionRegex;
@@ -54,24 +57,29 @@ if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY) {
 const s3 = new AWS.S3({
     signatureVersion: 'v4'
 });
-const delimeter = "/";
+exports.delimeter = "/";
 const bucketName = "trust-repository";
-const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter + "zip";
-async function uploadPackage(dir, name, version) {
+const exampleKey = "MyName" + exports.delimeter + "1.0.0" + exports.delimeter + "MyName-1" + exports.delimeter + "zip";
+async function uploadPackage(dir, name, version, debloat) {
     try {
-        const fileStreamZip = fs.createReadStream(dir + ".zip");
+        if (debloat) {
+            var fileStreamZip = fs.createReadStream(dir + "-debloated.zip");
+        }
+        else {
+            var fileStreamZip = fs.createReadStream(dir + ".zip");
+        }
         const id = await getUniqueID(name);
-        const pathName = name + delimeter + version + delimeter + id;
+        const pathName = name + exports.delimeter + version + exports.delimeter + id;
         const paramsZip = {
             Bucket: bucketName,
-            Key: pathName + delimeter + "zip", // The S3 key (file name) where you want to store the file
+            Key: pathName + exports.delimeter + "zip", // The S3 key (file name) where you want to store the file
             Body: fileStreamZip
         };
         const uploadResultZip = await s3.upload(paramsZip).promise();
         const fileStreamJson = fs.createReadStream(dir + ".json");
         const paramsJson = {
             Bucket: bucketName,
-            Key: pathName + delimeter + "json", // The S3 key (file name) where you want to store the file
+            Key: pathName + exports.delimeter + "json", // The S3 key (file name) where you want to store the file
             Body: fileStreamJson
         };
         const uploadResultJson = await s3.upload(paramsJson).promise();
@@ -79,7 +87,7 @@ async function uploadPackage(dir, name, version) {
             const fileStreamRead = fs.createReadStream(dir + "/README.md");
             const paramsRead = {
                 Bucket: bucketName,
-                Key: pathName + delimeter + "READ", // The S3 key (file name) where you want to store the file
+                Key: pathName + exports.delimeter + "READ", // The S3 key (file name) where you want to store the file
                 Body: fileStreamRead
             };
             const uploadResultRead = await s3.upload(paramsRead).promise();
@@ -123,7 +131,7 @@ async function getUniqueID(packageName) {
     }
     let max = 0;
     keys.forEach(key => {
-        let testNum = Number(key.split(delimeter)[2].replace(packageName + "-", ""));
+        let testNum = Number(key.split(exports.delimeter)[2].replace(packageName + "-", ""));
         if (testNum > max) {
             max = testNum;
         }
@@ -281,7 +289,7 @@ async function getByID(packageID) {
     // Get the associated object and convert to base64
     const getObjectCommand = {
         Bucket: bucketName,
-        Key: prefix + delimeter + "zip",
+        Key: prefix + exports.delimeter + "zip",
     };
     const obData = await s3.getObject(getObjectCommand).promise();
     const stream = obData.Body;
@@ -289,7 +297,7 @@ async function getByID(packageID) {
     // Check if this needs a URL in it by getting the JSON file
     const getObjectJsonCommand = {
         Bucket: bucketName,
-        Key: prefix + delimeter + "json",
+        Key: prefix + exports.delimeter + "json",
     };
     const obJData = await s3.getObject(getObjectJsonCommand).promise();
     const streamJ = obJData.Body;
@@ -301,7 +309,7 @@ async function getByID(packageID) {
         Content: base64,
         Name: packageName,
         ID: packageID,
-        Version: prefix.split(delimeter)[1]
+        Version: prefix.split(exports.delimeter)[1]
     };
     // Add the URL if Needed
     if (!data.ByContent) {
@@ -433,7 +441,7 @@ async function getRatingByID(packageID) {
     // Get JSON
     const getObjectCommand = {
         Bucket: bucketName,
-        Key: prefix + delimeter + "json",
+        Key: prefix + exports.delimeter + "json",
     };
     const obData = await s3.getObject(getObjectCommand).promise();
     const stream = obData.Body;
@@ -457,6 +465,20 @@ async function getRatingByID(packageID) {
         NetScoreLatency: rating.NetScore_Latency
     };
 }
+async function checkIfUploadByContent(packageID) {
+    const prefix = await getPrefixByID(packageID);
+    if (prefix == undefined) {
+        return false;
+    }
+    const getObjectJsonCommand = {
+        Bucket: bucketName,
+        Key: prefix + exports.delimeter + "json",
+    };
+    const obJData = await s3.getObject(getObjectJsonCommand).promise();
+    const streamJ = obJData.Body;
+    const data = JSON.parse(streamJ?.toString('utf-8'));
+    return data.ByContent;
+}
 async function getPrefixByID(packageID) {
     const lastUnder = packageID.lastIndexOf("-");
     const packageName = packageID.slice(0, lastUnder);
@@ -477,8 +499,8 @@ async function getPrefixByID(packageID) {
             const data = await s3.listObjectsV2(params).promise();
             if (data.Contents) {
                 for (let object of data.Contents) {
-                    if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip") {
-                        return object.Key.slice(0, object.Key.lastIndexOf(delimeter));
+                    if (object.Key?.split(exports.delimeter)[2] == packageID && object.Key?.split(exports.delimeter)[3] == "zip") {
+                        return object.Key.slice(0, object.Key.lastIndexOf(exports.delimeter));
                     }
                 }
             }
@@ -491,6 +513,24 @@ async function getPrefixByID(packageID) {
         }
     }
     return undefined;
+}
+async function getPrefixParamsByID(packageID) {
+    const prefix = await getPrefixByID(packageID);
+    if (prefix == undefined) {
+        return {
+            Name: "",
+            Version: "",
+            ID: ""
+        };
+    }
+    else {
+        const prefixArray = prefix.split(exports.delimeter);
+        return {
+            Name: prefixArray[0],
+            Version: prefixArray[1],
+            ID: prefixArray[2]
+        };
+    }
 }
 async function getRegexArray(regexOb) {
     const params = {
@@ -507,19 +547,19 @@ async function getRegexArray(regexOb) {
             const data = await s3.listObjectsV2(params).promise();
             if (data.Contents) {
                 for (let object of data.Contents) {
-                    if (object.Key?.split(delimeter)[3] == "zip") {
-                        if (regexOb.test(object.Key?.split(delimeter)[0])) {
+                    if (object.Key?.split(exports.delimeter)[3] == "zip") {
+                        if (regexOb.test(object.Key?.split(exports.delimeter)[0])) {
                             returnArray.push({
-                                Version: object.Key?.split(delimeter)[1],
-                                Name: object.Key?.split(delimeter)[0],
-                                ID: object.Key?.split(delimeter)[2],
+                                Version: object.Key?.split(exports.delimeter)[1],
+                                Name: object.Key?.split(exports.delimeter)[0],
+                                ID: object.Key?.split(exports.delimeter)[2],
                             });
                         }
                         else {
-                            const testPrefix = object.Key?.slice(0, object.Key?.lastIndexOf(delimeter));
+                            const testPrefix = object.Key?.slice(0, object.Key?.lastIndexOf(exports.delimeter));
                             const getObjectREADCommand = {
                                 Bucket: bucketName,
-                                Key: testPrefix + delimeter + "READ",
+                                Key: testPrefix + exports.delimeter + "READ",
                             };
                             try {
                                 const obData = await s3.getObject(getObjectREADCommand).promise();
@@ -527,9 +567,9 @@ async function getRegexArray(regexOb) {
                                 const readMeBody = stream?.toString('utf-8');
                                 if (regexOb.test(readMeBody)) {
                                     returnArray.push({
-                                        Version: object.Key?.split(delimeter)[1],
-                                        Name: object.Key?.split(delimeter)[0],
-                                        ID: object.Key?.split(delimeter)[2],
+                                        Version: object.Key?.split(exports.delimeter)[1],
+                                        Name: object.Key?.split(exports.delimeter)[0],
+                                        ID: object.Key?.split(exports.delimeter)[2],
                                     });
                                 }
                             }

@@ -68,7 +68,7 @@ export function debloatPackage(zipFilePath: string, debloat: boolean): void {
         zip.extractAllTo(TEMP_DIR, true);
     
         removeUnnecessaryFiles(TEMP_DIR);
-        performTreeShakingAndMinification(TEMP_DIR);
+        //performTreeShakingAndMinification(TEMP_DIR); // FOR NOW IGNORE THIS BECAUSE IT IS CAUSING PROBLEMS!!!!
 
         const newZip = new AdmZip();
         newZip.addLocalFolder(TEMP_DIR);

@@ -72,10 +72,18 @@ export const handler: Handler = async (event, context) => {
 
     try
     {
+        // Create random directory with number and make sure it does not exist
+        let dir: string = "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1)
+        
+        while (existsSync(dir)) 
+        {
+            dir = "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1);
+        }
+
         // URL Proceedure
         if (url != undefined)
         {  
-            return urlExtract(url, "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1), debloat);
+            return urlExtract(url, dir, debloat);
         }
         // Content Proceedure
         else
@@ -88,7 +96,7 @@ export const handler: Handler = async (event, context) => {
                 return Err400;
             }
 
-            return contentExtract(content, "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1), Name, debloat);
+            return contentExtract(content, dir, Name, debloat);
         }
     }
     catch
@@ -161,14 +169,12 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
         }
         else
         {
-            await deleteDirectory(dir);
             return Err400;
         }
     }
     catch (err)
     {
         console.log(err);
-        await deleteDirectory(dir);
         return Err400;
     }
     
@@ -206,14 +212,12 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     const prefixCheck = await checkPrefixExists(Name);
     if (prefixCheck)
     {
-        await deleteDirectory(dir);
         return Err409;
     }
 
     // S3 (Version and ID)
-    const id: string = await uploadPackage(dir, Name, version);
+    const id: string = await uploadPackage(dir, Name, version, debloat);
 
-    await deleteDirectory(dir);
 
     const result = {
         statusCode: 201,
@@ -289,7 +293,6 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
         // Disqualify Based on no URL present
         if (testurl == "")
         {
-            await deleteDirectory(dir);
             return Err424;
         }
 
@@ -301,13 +304,11 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
         if (rating.NetScore <= 0.5)
         {
-            await deleteDirectory(dir);
             return Err424;
         }
     }
     catch
     {
-        await deleteDirectory(dir);
         return Err424;
     }
 
@@ -319,7 +320,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     var base64 = zipBufferd.toString('base64');
 
     // Send Rating to json
-    rating.Cost = zipBuffer.byteLength / 1000000;
+    rating.Cost = zipBufferd.byteLength / 1000000;
     rating.ByContent = true;
 
     writeFileSync(dir + ".json", JSON.stringify(rating));
@@ -328,14 +329,11 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     const prefixCheck = await checkPrefixExists(Name);
     if (prefixCheck)
     {
-        await deleteDirectory(dir);
         return Err409;
     }
 
     // UPLOAD TO S3 (Version and ID)
-    const id: string = await uploadPackage(dir, Name, "1.0.0");
-
-    await deleteDirectory(dir);
+    const id: string = await uploadPackage(dir, Name, "1.0.0", debloat);
 
     const result = {
         statusCode: 201,
@@ -355,34 +353,6 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     };
 
     return result
-}
-
-async function deleteDirectory(directoryPath: string): Promise<void> {
-    try {
-        // Read the contents of the directory
-        const files = await fs.readdir(directoryPath);
-
-        // Iterate through each item in the directory
-        for (const file of files) {
-            const filePath = path.join(directoryPath, file);
-            const stats = await fs.stat(filePath);
-
-            if (stats.isDirectory()) {
-                // If it's a directory, recursively delete its contents
-                await deleteDirectory(filePath);
-            } else {
-                // If it's a file, delete it
-                await fs.unlink(filePath);
-            }
-        }
-
-        // After deleting all contents, remove the directory itself
-        await fs.rmdir(directoryPath);
-        console.log(`Deleted directory: ${directoryPath}`);
-
-    } catch (error) {
-        console.error('Error deleting directory:', error);
-    }
 }
 
 async function mainTest()

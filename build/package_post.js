@@ -33,7 +33,6 @@ const s3_repo_1 = require("./s3_repo");
 const fs_1 = require("fs");
 const archiver_1 = __importDefault(require("archiver"));
 const unzipper = __importStar(require("unzipper"));
-const path = __importStar(require("path"));
 const http = __importStar(require("isomorphic-git/http/node"));
 const git = __importStar(require("isomorphic-git"));
 const promises_1 = require("timers/promises");
@@ -82,9 +81,14 @@ const handler = async (event, context) => {
         return Err400;
     }
     try {
+        // Create random directory with number and make sure it does not exist
+        let dir = "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1);
+        while ((0, fs_1.existsSync)(dir)) {
+            dir = "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1);
+        }
         // URL Proceedure
         if (url != undefined) {
-            return urlExtract(url, "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1), debloat);
+            return urlExtract(url, dir, debloat);
         }
         // Content Proceedure
         else {
@@ -93,7 +97,7 @@ const handler = async (event, context) => {
             if (Name == undefined || Name.includes("/")) {
                 return Err400;
             }
-            return contentExtract(content, "/tmp/repo/" + String(Math.floor(Math.random() * (100000 - 1 + 1)) + 1), Name, debloat);
+            return contentExtract(content, dir, Name, debloat);
         }
     }
     catch {
@@ -146,13 +150,11 @@ async function urlExtract(testurl, dir, debloat) {
             version = "1.0.0";
         }
         else {
-            await deleteDirectory(dir);
             return Err400;
         }
     }
     catch (err) {
         console.log(err);
-        await deleteDirectory(dir);
         return Err400;
     }
     // Use Archiver to create a zip file from this dir
@@ -177,12 +179,10 @@ async function urlExtract(testurl, dir, debloat) {
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
     if (prefixCheck) {
-        await deleteDirectory(dir);
         return Err409;
     }
     // S3 (Version and ID)
-    const id = await (0, s3_repo_1.uploadPackage)(dir, Name, version);
-    await deleteDirectory(dir);
+    const id = await (0, s3_repo_1.uploadPackage)(dir, Name, version, debloat);
     const result = {
         statusCode: 201,
         headers: {
@@ -237,7 +237,6 @@ async function contentExtract(content, dir, Name, debloat) {
         }
         // Disqualify Based on no URL present
         if (testurl == "") {
-            await deleteDirectory(dir);
             return Err424;
         }
         // Convert to a valid repo and define the dir for the cloned repo
@@ -245,12 +244,10 @@ async function contentExtract(content, dir, Name, debloat) {
         // Rate Package
         var rating = await (0, rate_1.processURL)(validURL);
         if (rating.NetScore <= 0.5) {
-            await deleteDirectory(dir);
             return Err424;
         }
     }
     catch {
-        await deleteDirectory(dir);
         return Err424;
     }
     // Debloat the package if true
@@ -258,18 +255,16 @@ async function contentExtract(content, dir, Name, debloat) {
     const zipBufferd = (0, fs_1.readFileSync)(zipFileDir);
     var base64 = zipBufferd.toString('base64');
     // Send Rating to json
-    rating.Cost = zipBuffer.byteLength / 1000000;
+    rating.Cost = zipBufferd.byteLength / 1000000;
     rating.ByContent = true;
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
     if (prefixCheck) {
-        await deleteDirectory(dir);
         return Err409;
     }
     // UPLOAD TO S3 (Version and ID)
-    const id = await (0, s3_repo_1.uploadPackage)(dir, Name, "1.0.0");
-    await deleteDirectory(dir);
+    const id = await (0, s3_repo_1.uploadPackage)(dir, Name, "1.0.0", debloat);
     const result = {
         statusCode: 201,
         headers: {
@@ -287,31 +282,6 @@ async function contentExtract(content, dir, Name, debloat) {
         })
     };
     return result;
-}
-async function deleteDirectory(directoryPath) {
-    try {
-        // Read the contents of the directory
-        const files = await fs_1.promises.readdir(directoryPath);
-        // Iterate through each item in the directory
-        for (const file of files) {
-            const filePath = path.join(directoryPath, file);
-            const stats = await fs_1.promises.stat(filePath);
-            if (stats.isDirectory()) {
-                // If it's a directory, recursively delete its contents
-                await deleteDirectory(filePath);
-            }
-            else {
-                // If it's a file, delete it
-                await fs_1.promises.unlink(filePath);
-            }
-        }
-        // After deleting all contents, remove the directory itself
-        await fs_1.promises.rmdir(directoryPath);
-        console.log(`Deleted directory: ${directoryPath}`);
-    }
-    catch (error) {
-        console.error('Error deleting directory:', error);
-    }
 }
 async function mainTest() {
     const result = await urlExtract("https://www.npmjs.com/package/react-hot-toast", "test/zipTest", false);
