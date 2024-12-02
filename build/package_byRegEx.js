@@ -28,7 +28,13 @@ const handler = async (event, context) => {
     catch {
         return Err400;
     }
-    const RegEx = body.RegEx;
+    try {
+        var RegEx = RegExp(body.RegEx);
+    }
+    catch (err) {
+        console.log(err);
+        return Err400;
+    }
     if (RegEx == undefined) {
         return Err400;
     }

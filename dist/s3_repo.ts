@@ -1,4 +1,5 @@
 import * as AWS from 'aws-sdk';
+import { error } from 'console';
 import dotenv from 'dotenv';
 import * as fs from 'fs';
 
@@ -600,10 +601,8 @@ async function getPrefixByID(packageID: string)
     return undefined;
 }
 
-export async function getRegexArray(regexString: string): Promise<object[]>
+export async function getRegexArray(regexOb: RegExp): Promise<object[]>
 {
-    let regexOb = RegExp(regexString);
-
     const params: AWS.S3.ListObjectsV2Request = {
         Bucket: bucketName
     };

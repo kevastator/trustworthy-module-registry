@@ -492,8 +492,7 @@ async function getPrefixByID(packageID) {
     }
     return undefined;
 }
-async function getRegexArray(regexString) {
-    let regexOb = RegExp(regexString);
+async function getRegexArray(regexOb) {
     const params = {
         Bucket: bucketName
     };

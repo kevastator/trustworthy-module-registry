@@ -33,7 +33,16 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
     
-    const RegEx: string = body.RegEx
+    try
+    {
+        var RegEx: RegExp = RegExp(body.RegEx);
+    }
+    catch (err)
+    {
+        console.log(err);
+        return Err400;
+    }
+    
 
     if (RegEx == undefined)
     {
