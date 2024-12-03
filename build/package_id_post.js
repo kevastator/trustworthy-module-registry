@@ -96,6 +96,7 @@ const handler = async (event, context) => {
     const metaID = body.metadata.ID;
     const URL = body.data.URL;
     const Content = body.data.Content;
+    const NameData = body.data.Name;
     var debloat = body.data.debloat;
     if (debloat == undefined) {
         debloat = false;
@@ -108,7 +109,7 @@ const handler = async (event, context) => {
         return Err409;
     }
     const updateFields = await (0, s3_repo_1.getPrefixParamsByID)(ID);
-    if (updateFields.Version = "") {
+    if (updateFields.Version == "") {
         return Err404;
     }
     if (updateFields.Name != Name || !(0, s3_repo_1.versionGreaterThan)(Version, updateFields.Version)) {

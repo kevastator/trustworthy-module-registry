@@ -82,6 +82,7 @@ export const handler: Handler = async (event, context) => {
 
     const URL = body.data.URL;
     const Content = body.data.Content;
+    const NameData = body.data.Name;
     var debloat = body.data.debloat;
 
     if (debloat == undefined)
@@ -103,7 +104,7 @@ export const handler: Handler = async (event, context) => {
 
     const updateFields = await getPrefixParamsByID(ID);
 
-    if (updateFields.Version = "")
+    if (updateFields.Version == "")
     {
         return Err404;
     }
