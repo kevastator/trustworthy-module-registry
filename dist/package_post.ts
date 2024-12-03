@@ -216,7 +216,6 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = false;
     rating.Dependencies = dependencies;
-    var dependencies: any = {};
 
     writeFileSync(dir + ".json", JSON.stringify(rating));
 

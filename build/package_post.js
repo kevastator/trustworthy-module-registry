@@ -183,7 +183,6 @@ async function urlExtract(testurl, dir, debloat) {
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = false;
     rating.Dependencies = dependencies;
-    var dependencies = {};
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
