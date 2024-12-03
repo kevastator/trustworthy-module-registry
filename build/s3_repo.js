@@ -33,6 +33,7 @@ exports.reset = reset;
 exports.getByID = getByID;
 exports.getRatingByID = getRatingByID;
 exports.checkIfUploadByContent = checkIfUploadByContent;
+exports.getCostByID = getCostByID;
 exports.getPrefixParamsByID = getPrefixParamsByID;
 exports.getRegexArray = getRegexArray;
 exports.getPackagesArray = getPackagesArray;
@@ -480,6 +481,40 @@ async function checkIfUploadByContent(packageID) {
     const streamJ = obJData.Body;
     const data = JSON.parse(streamJ?.toString('utf-8'));
     return data.ByContent;
+}
+async function getCostByID(packageID, dependencies) {
+    const prefix = await getPrefixByID(packageID);
+    if (prefix == undefined) {
+        return {
+            packageID: undefined
+        };
+    }
+    // Get JSON
+    const getObjectCommand = {
+        Bucket: bucketName,
+        Key: prefix + exports.delimeter + "json",
+    };
+    const obData = await s3.getObject(getObjectCommand).promise();
+    const stream = obData.Body;
+    const rating = JSON.parse(stream?.toString('utf-8'));
+    return {
+        BusFactor: rating.BusFactor,
+        BusFactorLatency: rating.BusFactor_Latency,
+        Correctness: rating.Correctness,
+        CorrectnessLatency: rating.Correctness_Latency,
+        RampUp: rating.RampUp,
+        RampUpLatency: rating.RampUp_Latency,
+        ResponsiveMaintainer: rating.ResponsiveMaintainer,
+        ResponsiveMaintainerLatency: rating.ResponsiveMaintainer_Latency,
+        LicenseScore: rating.License,
+        LicenseScoreLatency: rating.License_Latency,
+        GoodPinningPractice: rating.FractionalDependency,
+        GoodPinningPracticeLatency: rating.FractionalDependency_Latency,
+        PullRequest: rating.PullRequest,
+        PullRequestLatency: rating.PullRequest_Latency,
+        NetScore: rating.NetScore,
+        NetScoreLatency: rating.NetScore_Latency
+    };
 }
 async function getPrefixByID(packageID) {
     const lastUnder = packageID.lastIndexOf("-");

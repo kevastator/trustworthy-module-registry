@@ -579,6 +579,49 @@ export async function checkIfUploadByContent(packageID: string): Promise<boolean
     return data.ByContent;
 }
 
+export async function getCostByID(packageID: string, dependencies: boolean)
+{
+    const prefix = await getPrefixByID(packageID);
+
+    if (prefix == undefined)
+    {
+        return {
+            packageID: undefined
+        }
+    }
+
+    // Get JSON
+    const getObjectCommand: AWS.S3.GetObjectRequest = {
+        Bucket: bucketName,
+        Key: prefix + delimeter + "json",
+    };
+
+    const obData = await s3.getObject(getObjectCommand).promise();
+
+    const stream = obData.Body 
+
+    const rating = JSON.parse(stream?.toString('utf-8')!);
+
+    return {
+        BusFactor: rating.BusFactor,
+        BusFactorLatency: rating.BusFactor_Latency,
+        Correctness: rating.Correctness,
+        CorrectnessLatency: rating.Correctness_Latency,
+        RampUp: rating.RampUp,
+        RampUpLatency: rating.RampUp_Latency,
+        ResponsiveMaintainer: rating.ResponsiveMaintainer,
+        ResponsiveMaintainerLatency: rating.ResponsiveMaintainer_Latency,
+        LicenseScore: rating.License,
+        LicenseScoreLatency: rating.License_Latency,
+        GoodPinningPractice: rating.FractionalDependency,
+        GoodPinningPracticeLatency: rating.FractionalDependency_Latency,
+        PullRequest: rating.PullRequest,
+        PullRequestLatency: rating.PullRequest_Latency,
+        NetScore: rating.NetScore,
+        NetScoreLatency: rating.NetScore_Latency
+    }
+}
+
 async function getPrefixByID(packageID: string)
 {
     const lastUnder: number = packageID.lastIndexOf("-");

@@ -136,6 +136,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
 
     var Name: string = "";
     var version: string = "";
+    var dependencies: any = {};
 
     // Clone the repository
     try
@@ -175,6 +176,11 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
         {
             return Err400;
         }
+
+        if ("dependencies" in packageJson)
+        {
+            dependencies = packageJson.dependencies;
+        }
     }
     catch (err)
     {
@@ -209,6 +215,8 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
     // Send Rating to json
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = false;
+    rating.Dependencies = dependencies;
+    var dependencies: any = {};
 
     writeFileSync(dir + ".json", JSON.stringify(rating));
 
@@ -221,7 +229,6 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
 
     // S3 (Version and ID)
     const id: string = await uploadPackage(dir, Name, version, debloat);
-
 
     const result = {
         statusCode: 201,
@@ -273,6 +280,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
         const packageJson = JSON.parse(packageData);
         let testurl: string = "";
+        var dependencies: any = {};
 
         // Find the Test URL
         if ("homepage" in packageJson)
@@ -292,6 +300,11 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
             {
                 testurl = testurl.split(".git")[0];
             }
+        }
+
+        if ("dependencies" in packageJson)
+        {
+            dependencies = packageJson.dependencies;
         }
 
         // Disqualify Based on no URL present
@@ -326,6 +339,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
     // Send Rating to json
     rating.Cost = zipBufferd.byteLength / 1000000;
     rating.ByContent = true;
+    rating.Dependencies = dependencies;
 
     writeFileSync(dir + ".json", JSON.stringify(rating));
 

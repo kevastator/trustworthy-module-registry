@@ -127,6 +127,7 @@ async function urlExtract(testurl, dir, debloat) {
     }
     var Name = "";
     var version = "";
+    var dependencies = {};
     // Clone the repository
     try {
         if (validURL.indexOf("git") == 0) {
@@ -155,6 +156,9 @@ async function urlExtract(testurl, dir, debloat) {
         else {
             return Err400;
         }
+        if ("dependencies" in packageJson) {
+            dependencies = packageJson.dependencies;
+        }
     }
     catch (err) {
         console.log(err);
@@ -178,6 +182,8 @@ async function urlExtract(testurl, dir, debloat) {
     // Send Rating to json
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = false;
+    rating.Dependencies = dependencies;
+    var dependencies = {};
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);
@@ -225,6 +231,7 @@ async function contentExtract(content, dir, Name, debloat) {
         const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
         const packageJson = JSON.parse(packageData);
         let testurl = "";
+        var dependencies = {};
         // Find the Test URL
         if ("homepage" in packageJson) {
             testurl = packageJson.homepage;
@@ -237,6 +244,9 @@ async function contentExtract(content, dir, Name, debloat) {
             if (testurl.includes(".git")) {
                 testurl = testurl.split(".git")[0];
             }
+        }
+        if ("dependencies" in packageJson) {
+            dependencies = packageJson.dependencies;
         }
         // Disqualify Based on no URL present
         if (testurl == "") {
@@ -260,6 +270,7 @@ async function contentExtract(content, dir, Name, debloat) {
     // Send Rating to json
     rating.Cost = zipBufferd.byteLength / 1000000;
     rating.ByContent = true;
+    rating.Dependencies = dependencies;
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // Check if the package exists -> Return 409 if not!
     const prefixCheck = await (0, s3_repo_1.checkPrefixExists)(Name);

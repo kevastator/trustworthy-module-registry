@@ -12,6 +12,7 @@
     "license": "LGPL-2.1",
     "dependencies": {
         "@types/aws-lambda": "^8.10.145",
+        "@types/graceful-fs": "^4.1.9",
         "@types/jest": "^29.5.13",
         "@types/node": "^22.5.4",
         "adm-zip": "^0.5.16",
@@ -20,6 +21,7 @@
         "axios": "^1.7.7",
         "dotenv": "^16.4.5",
         "fs-extra": "^11.2.0",
+        "graceful-fs": "^4.2.11",
         "isomorphic-git": "^1.27.1",
         "jest": "^29.7.0",
         "serverless": "^4.4.6",
