@@ -137,7 +137,10 @@ async function urlExtract(testurl, dir, debloat) {
             http,
             dir,
             url: validURL,
+            singleBranch: true,
+            depth: 1
         });
+        await (0, promises_1.setTimeout)(100);
         const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
         const packageJson = JSON.parse(packageData);
         // Check if the name and version are properly in the package json file to be uploaded
@@ -284,7 +287,7 @@ async function contentExtract(content, dir, Name, debloat) {
     return result;
 }
 async function mainTest() {
-    const result = await urlExtract("https://www.npmjs.com/package/react-hot-toast", "test/zipTest", false);
+    const result = await urlExtract("https://www.npmjs.com/package/react", "test/zipTest", false);
     console.log(result);
     try {
         const body = JSON.parse(result.body);

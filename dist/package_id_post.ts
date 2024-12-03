@@ -196,7 +196,11 @@ async function urlExtract(testurl: string, dir: string, Name: string, Version: s
             http,
             dir,
             url: validURL,
+            singleBranch: true,
+            depth: 1
         });
+
+        await setTimeout(100);
     }
     catch (err)
     {

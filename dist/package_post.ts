@@ -150,7 +150,11 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
             http,
             dir,
             url: validURL,
+            singleBranch: true,
+            depth: 1
         });
+
+        await setTimeout(100);
 
         const packageData = await readFileSync(dir + "/package.json", "utf-8");
 
@@ -357,7 +361,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://www.npmjs.com/package/react-hot-toast", "test/zipTest", false);
+    const result: any = await urlExtract("https://www.npmjs.com/package/react", "test/zipTest", false);
 
     console.log(result);
     

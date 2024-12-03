@@ -173,7 +173,10 @@ async function urlExtract(testurl, dir, Name, Version, debloat) {
             http,
             dir,
             url: validURL,
+            singleBranch: true,
+            depth: 1
         });
+        await (0, promises_1.setTimeout)(100);
     }
     catch (err) {
         console.log(err);
