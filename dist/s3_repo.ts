@@ -25,6 +25,7 @@ const s3 = new AWS.S3({
 export const delimeter = "/";
 const bucketName = "trust-repository";
 const exampleKey = "MyName" + delimeter + "1.0.0" + delimeter + "MyName-1" + delimeter +  "zip";
+const maxObReturn = 500;
 
 export async function uploadPackage(dir: string, name: string, version: string, debloat: boolean): Promise<string>
 {
@@ -738,6 +739,76 @@ export async function getRegexArray(regexOb: RegExp): Promise<object[]>
     return returnArray;
 }
 
+export async function getPackagesArray(queries: any[]): Promise<object[]>
+{
+    const params: AWS.S3.ListObjectsV2Request = {
+        Bucket: bucketName
+    };
+
+    let continuationToken: string | undefined = undefined;
+
+    let isTruncated = true;  // To check if there are more objects to list
+
+    let returnArray: object[] = [];
+
+    let counter = 0; // Return at most 500 objects
+
+    while (isTruncated)
+    {
+        try
+        {
+            if (continuationToken) {
+                params.ContinuationToken = continuationToken;  // Set continuation token for pagination
+            }
+
+            const data = await s3.listObjectsV2(params).promise();
+
+            if (data.Contents)
+            {
+                for (let object of data.Contents)
+                {
+                    if (object.Key?.split(delimeter)[3] == "zip")
+                    {
+                        const testName = object.Key?.split(delimeter)[0];
+                        const testVersion = object.Key?.split(delimeter)[1];
+                        const testID = object.Key?.split(delimeter)[2];
+
+                        for (let i = 0; i < queries.length; i++)
+                        {
+                            if (queries[i].Name == "*" || (testName == queries[i].Name && versionQualifyCheck(queries[i].Version, testVersion)))
+                            {
+                                returnArray.push({
+                                    Version: testVersion,
+                                    Name: testName,
+                                    ID: testID
+                                });
+
+                                counter++;
+
+                                break;
+                            }
+                        }
+
+                        if (counter > maxObReturn)
+                        {
+                            return [{Err: "TOO MANY"}];
+                        }
+                    }
+                }
+            }
+
+            isTruncated = data.IsTruncated as boolean;
+            continuationToken = data.NextContinuationToken;
+        }
+        catch (err)
+        {
+            console.log(err);
+        }
+    }
+
+    return returnArray;
+}
+
 export function versionGreaterThan(versionG: string, versionL: string): boolean
 {
     let versionG1: Number = Number(versionG.split(".")[0]);
@@ -771,6 +842,11 @@ export function checkValidVersionRegex(versionString: string): boolean
     const regex =  versionRegex.test(versionString);
 
     const isRangeWithCaretOrTilde = versionString.includes('-') && (versionString.startsWith('^') || versionString.startsWith('~'));
+
+    if (versionString.includes("-") && versionGreaterThan(versionString.split("-")[0], versionString.split("-")[1]))
+    {
+        return false;
+    }
 
     return regex && !isRangeWithCaretOrTilde;
 }

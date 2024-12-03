@@ -4,37 +4,56 @@ exports.handler = void 0;
 const s3_repo_1 = require("./s3_repo");
 const Err400 = {
     statusCode: 400,
-    body: {
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
         message: "There is missing field(s) in the PackageQuery or it is formed improperly, or is invalid."
-    }
+    })
+};
+const Err413 = {
+    statusCode: 413,
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        message: "Too many packages returned."
+    })
 };
 const handler = async (event, context) => {
-    const Version = event.Version;
-    const Name = event.Name;
-    if (Name == undefined || Version == undefined || !(0, s3_repo_1.checkValidVersion)(Version)) {
+    let body = [];
+    try {
+        body = JSON.parse(event.body);
+        for (let i = 0; i < body.length; i++) {
+            if (body[i].Name == undefined || body[i].Version == undefined || !(0, s3_repo_1.checkValidVersionRegex)(body[i].Version)) {
+                return Err400;
+            }
+        }
+    }
+    catch {
         return Err400;
     }
-    // TODO S3 RETRIEVAL IMPLIMENTATION
-    // MOCK RETURN
+    // S3 RETRIEVAL IMPLIMENTATION
+    const foundObjects = await (0, s3_repo_1.getPackagesArray)(body);
+    if (foundObjects.length == 0) {
+        const result = {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(foundObjects)
+        };
+        return result;
+    }
+    else if ("Err" in foundObjects[0]) {
+        return Err413;
+    }
     const result = {
         statusCode: 200,
-        body: [
-            {
-                Version: "1.2.3",
-                Name: "Underscore",
-                ID: "17621"
-            },
-            {
-                Version: "1.2.3",
-                Name: "Lodash",
-                ID: "91273"
-            },
-            {
-                Version: "1.2.3",
-                Name: "React",
-                ID: "71283"
-            }
-        ]
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(foundObjects)
     };
     return result;
 };

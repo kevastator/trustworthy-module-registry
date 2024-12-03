@@ -35,8 +35,11 @@ describe("Version Testing", () => {
     it("Version ^7.190.21 should be valid", () => {
         expect((0, s3_repo_1.checkValidVersionRegex)("^7.190.21")).toBe(true);
     });
-    it("Version 8.5.6-7.8.4 should be valid", () => {
-        expect((0, s3_repo_1.checkValidVersionRegex)("8.5.6-7.8.4")).toBe(true);
+    it("Version 8.5.6-7.8.4 should be invalid", () => {
+        expect((0, s3_repo_1.checkValidVersionRegex)("8.5.6-7.8.4")).toBe(false);
+    });
+    it("Version 6.5.6-7.8.4 should be valid", () => {
+        expect((0, s3_repo_1.checkValidVersionRegex)("6.5.6-7.8.4")).toBe(true);
     });
     it("Version ~8.5.6-7.8.4 should be invalid", () => {
         expect((0, s3_repo_1.checkValidVersionRegex)("~8.5.6-7.8.4")).toBe(false);
