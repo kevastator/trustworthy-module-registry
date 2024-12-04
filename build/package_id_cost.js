@@ -26,7 +26,8 @@ const handler = async (event, context) => {
     if (id == undefined) {
         return Err400;
     }
-    if (event.queryStringParameters.dependency != undefined) {
+    // Check if the query parameters are set
+    if (event.queryStringParameters != undefined && event.queryStringParameters.dependency != undefined) {
         dep = event.queryStringParameters.dependency;
     }
     // S3 SEARCH AND RETURN 404 IF NOT FOUND

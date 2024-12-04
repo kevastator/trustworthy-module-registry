@@ -33,7 +33,8 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
 
-    if (event.queryStringParameters.dependency != undefined)
+    // Check if the query parameters are set
+    if (event.queryStringParameters != undefined && event.queryStringParameters.dependency != undefined)
     {
         dep = event.queryStringParameters.dependency;
     }
