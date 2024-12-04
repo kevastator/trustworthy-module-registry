@@ -31,14 +31,15 @@ export const handler: Handler = async (event, context) => {
 
         for (let i = 0; i < body.length; i++)
         {
-            if (body[i].Name == undefined || body[i].Version == undefined || !checkValidVersionRegex(body[i].Version))
+            if (body[i].Name == undefined || (body[i].Version != undefined && body[i].Version != "" && !checkValidVersionRegex(body[i].Version)))
             {
                 return Err400;
             }
         }
     }
-    catch
+    catch (err)
     {
+        console.log(err);
         return Err400;
     }
 

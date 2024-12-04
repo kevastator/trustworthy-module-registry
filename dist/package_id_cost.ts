@@ -1,4 +1,6 @@
 import { Handler } from 'aws-lambda';
+import { getCostByID } from './s3_repo';
+import { dependencies } from 'webpack';
 
 const Err400 = {
     statusCode: 400,
@@ -36,5 +38,21 @@ export const handler: Handler = async (event, context) => {
         dep = false;
     }
 
-    return Err400;
+    // S3 SEARCH AND RETURN 404 IF NOT FOUND
+    const searchResults = await getCostByID(id, dep);
+
+    if (searchResults.id = undefined)
+    {
+        return Err404;
+    }
+
+    const result = {
+        statusCode: 200,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(searchResults)
+    };
+
+    return result;
 };

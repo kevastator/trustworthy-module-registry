@@ -25,12 +25,13 @@ const handler = async (event, context) => {
     try {
         body = JSON.parse(event.body);
         for (let i = 0; i < body.length; i++) {
-            if (body[i].Name == undefined || body[i].Version == undefined || !(0, s3_repo_1.checkValidVersionRegex)(body[i].Version)) {
+            if (body[i].Name == undefined || (body[i].Version != undefined && body[i].Version != "" && !(0, s3_repo_1.checkValidVersionRegex)(body[i].Version))) {
                 return Err400;
             }
         }
     }
-    catch {
+    catch (err) {
+        console.log(err);
         return Err400;
     }
     // S3 RETRIEVAL IMPLIMENTATION

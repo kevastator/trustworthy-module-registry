@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
+const s3_repo_1 = require("./s3_repo");
 const Err400 = {
     statusCode: 400,
     headers: {
@@ -28,6 +29,18 @@ const handler = async (event, context) => {
     if (dep == undefined) {
         dep = false;
     }
-    return Err400;
+    // S3 SEARCH AND RETURN 404 IF NOT FOUND
+    const searchResults = await (0, s3_repo_1.getCostByID)(id, dep);
+    if (searchResults.id = undefined) {
+        return Err404;
+    }
+    const result = {
+        statusCode: 200,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(searchResults)
+    };
+    return result;
 };
 exports.handler = handler;

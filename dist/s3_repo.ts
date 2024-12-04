@@ -583,11 +583,13 @@ export async function getCostByID(packageID: string, dependencies: boolean)
 {
     const prefix = await getPrefixByID(packageID);
 
+    const returnObj: any = {};
+
     if (prefix == undefined)
     {
-        return {
-            packageID: undefined
-        }
+        returnObj[packageID] = undefined;
+
+        return returnObj
     }
 
     // Get JSON
@@ -602,24 +604,18 @@ export async function getCostByID(packageID: string, dependencies: boolean)
 
     const rating = JSON.parse(stream?.toString('utf-8')!);
 
-    return {
-        BusFactor: rating.BusFactor,
-        BusFactorLatency: rating.BusFactor_Latency,
-        Correctness: rating.Correctness,
-        CorrectnessLatency: rating.Correctness_Latency,
-        RampUp: rating.RampUp,
-        RampUpLatency: rating.RampUp_Latency,
-        ResponsiveMaintainer: rating.ResponsiveMaintainer,
-        ResponsiveMaintainerLatency: rating.ResponsiveMaintainer_Latency,
-        LicenseScore: rating.License,
-        LicenseScoreLatency: rating.License_Latency,
-        GoodPinningPractice: rating.FractionalDependency,
-        GoodPinningPracticeLatency: rating.FractionalDependency_Latency,
-        PullRequest: rating.PullRequest,
-        PullRequestLatency: rating.PullRequest_Latency,
-        NetScore: rating.NetScore,
-        NetScoreLatency: rating.NetScore_Latency
+    if (!dependencies)
+    {
+        returnObj[packageID] = {
+            totalCost: rating.Cost
+        };
+
+        return returnObj
     }
+
+    returnObj[packageID] = undefined;
+
+        return returnObj
 }
 
 async function getPrefixByID(packageID: string)
@@ -818,7 +814,7 @@ export async function getPackagesArray(queries: any[]): Promise<object[]>
 
                         for (let i = 0; i < queries.length; i++)
                         {
-                            if (queries[i].Name == "*" || (testName == queries[i].Name && versionQualifyCheck(queries[i].Version, testVersion)))
+                            if (queries[i].Name == "*" || (testName == queries[i].Name && (testVersion == "" || testVersion == undefined || versionQualifyCheck(queries[i].Version, testVersion))))
                             {
                                 returnArray.push({
                                     Version: testVersion,
