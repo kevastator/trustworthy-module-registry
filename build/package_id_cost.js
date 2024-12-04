@@ -31,7 +31,7 @@ const handler = async (event, context) => {
         dep = event.queryStringParameters.dependency;
     }
     // S3 SEARCH AND RETURN 404 IF NOT FOUND
-    const searchResults = await (0, s3_repo_1.getCostByID)(id, dep);
+    const searchResults = await (0, s3_repo_1.getCostByID)(id, dep, {});
     if (!(id in searchResults) || searchResults[id] == undefined) {
         return Err404;
     }

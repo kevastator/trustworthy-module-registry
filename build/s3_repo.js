@@ -482,9 +482,8 @@ async function checkIfUploadByContent(packageID) {
     const data = JSON.parse(streamJ?.toString('utf-8'));
     return data.ByContent;
 }
-async function getCostByID(packageID, dependencies) {
+async function getCostByID(packageID, dependencies, returnObj) {
     const prefix = await getPrefixByID(packageID);
-    const returnObj = {};
     if (prefix == undefined) {
         returnObj[packageID] = undefined;
         return returnObj;
@@ -501,6 +500,33 @@ async function getCostByID(packageID, dependencies) {
         returnObj[packageID] = {
             totalCost: rating.Cost
         };
+        return returnObj;
+    }
+    else {
+        const dependencies = rating.Dependencies;
+        let totalCost = rating.Cost;
+        returnObj[packageID] = {
+            standaloneCost: rating.Cost
+        };
+        for (const [key, value] of dependencies) {
+            const dep_data = await getPackagesArray([
+                {
+                    Name: key,
+                    Version: value
+                }
+            ]);
+            const dep_id = dep_data[0].ID;
+            if (dep_id != undefined && !(dep_id in returnObj)) {
+                const costful = await getCostByID(dep_id, true, returnObj);
+                totalCost += costful[dep_id]["totalCost"];
+            }
+        }
+        returnObj[packageID]["totalCost"] = totalCost;
+        for (const [key, value] of returnObj) {
+            if (!(key in dependencies)) {
+                delete returnObj[key];
+            }
+        }
         return returnObj;
     }
     returnObj[packageID] = undefined;

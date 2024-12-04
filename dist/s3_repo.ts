@@ -579,11 +579,9 @@ export async function checkIfUploadByContent(packageID: string): Promise<boolean
     return data.ByContent;
 }
 
-export async function getCostByID(packageID: string, dependencies: boolean)
+export async function getCostByID(packageID: string, dependencies: boolean, returnObj: any)
 {
     const prefix = await getPrefixByID(packageID);
-
-    const returnObj: any = {};
 
     if (prefix == undefined)
     {
@@ -612,10 +610,51 @@ export async function getCostByID(packageID: string, dependencies: boolean)
 
         return returnObj
     }
+    else
+    {
+        const dependencies = rating.Dependencies;
+
+        let totalCost: number = rating.Cost;
+
+        returnObj[packageID] = {
+            standaloneCost: rating.Cost
+        };
+
+        for (const [key, value] of dependencies) 
+        {
+            const dep_data: any[] = await getPackagesArray([
+                {
+                    Name: key,
+                    Version: value
+                }
+            ])
+
+            const dep_id = dep_data[0].ID;
+
+            if (dep_id != undefined && !(dep_id in returnObj))
+            {
+                const costful: any = await getCostByID(dep_id, true, returnObj);
+
+                totalCost += costful[dep_id]["totalCost"];
+            }
+        }
+
+        returnObj[packageID]["totalCost"] = totalCost;
+
+        for (const [key, value] of returnObj)
+        {
+            if (!(key in dependencies))
+            {
+                delete returnObj[key];
+            }
+        }
+
+        return returnObj
+    }
 
     returnObj[packageID] = undefined;
 
-        return returnObj
+    return returnObj
 }
 
 async function getPrefixByID(packageID: string)
