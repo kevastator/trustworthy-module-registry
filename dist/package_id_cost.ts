@@ -26,16 +26,16 @@ export const handler: Handler = async (event, context) => {
 
     const id = event.pathParameters.id
 
-    let dep: boolean = event.queryStringParameters.dependency
+    let dep: boolean = false;
 
     if (id ==  undefined)
     {
         return Err400;
     }
 
-    if (dep == undefined)
+    if (event.queryStringParameters.dependency != undefined)
     {
-        dep = false;
+        dep = event.queryStringParameters.dependency;
     }
 
     // S3 SEARCH AND RETURN 404 IF NOT FOUND

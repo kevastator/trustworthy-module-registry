@@ -22,12 +22,12 @@ const Err404 = {
 };
 const handler = async (event, context) => {
     const id = event.pathParameters.id;
-    let dep = event.queryStringParameters.dependency;
+    let dep = false;
     if (id == undefined) {
         return Err400;
     }
-    if (dep == undefined) {
-        dep = false;
+    if (event.queryStringParameters.dependency != undefined) {
+        dep = event.queryStringParameters.dependency;
     }
     // S3 SEARCH AND RETURN 404 IF NOT FOUND
     const searchResults = await (0, s3_repo_1.getCostByID)(id, dep);
