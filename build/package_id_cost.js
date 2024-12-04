@@ -32,7 +32,7 @@ const handler = async (event, context) => {
     }
     // S3 SEARCH AND RETURN 404 IF NOT FOUND
     const searchResults = await (0, s3_repo_1.getCostByID)(id, dep);
-    if (searchResults.id = undefined) {
+    if (searchResults.id == undefined) {
         return Err404;
     }
     // Formatting was fixed in recusive object array return

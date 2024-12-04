@@ -42,7 +42,7 @@ export const handler: Handler = async (event, context) => {
     // S3 SEARCH AND RETURN 404 IF NOT FOUND
     const searchResults = await getCostByID(id, dep);
 
-    if (searchResults.id = undefined)
+    if (searchResults.id == undefined)
     {
         return Err404;
     }
