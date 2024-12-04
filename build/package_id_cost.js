@@ -34,6 +34,7 @@ const handler = async (event, context) => {
     if (searchResults.id = undefined) {
         return Err404;
     }
+    // Formatting was fixed in recusive object array return
     const result = {
         statusCode: 200,
         headers: {
