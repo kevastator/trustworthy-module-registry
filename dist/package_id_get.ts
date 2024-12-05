@@ -55,7 +55,7 @@ export const handler: Handler = async (event, context) => {
                 "Access-Control-Allow-Headers": "Content-Type",
             },
             body: JSON.stringify({
-                message: {
+                metadata: {
                     Name: searchResults.Name,
                     Version: searchResults.Version,
                     ID: searchResults.ID
@@ -80,7 +80,7 @@ export const handler: Handler = async (event, context) => {
                 "Access-Control-Allow-Headers": "Content-Type",
             },
             body: JSON.stringify({
-                message: {
+                metadata: {
                     Name: searchResults.Name,
                     Version: searchResults.Version,
                     ID: searchResults.ID
