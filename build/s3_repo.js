@@ -516,7 +516,7 @@ async function getCostByID(packageID, dependencies, returnObj) {
                 }
             ]);
             let dep_id = undefined;
-            if (dep_data != undefined) {
+            if (dep_data != undefined && dep_data.length != 0) {
                 dep_id = dep_data[0].ID;
             }
             if (dep_id != undefined && !(dep_id in returnObj)) {
@@ -526,7 +526,7 @@ async function getCostByID(packageID, dependencies, returnObj) {
         }
         returnObj[packageID]["totalCost"] = totalCost;
         for (const key in returnObj) {
-            if (!(key in dependencies)) {
+            if (!(key in dependencies) && key != packageID) {
                 delete returnObj[key];
             }
         }
