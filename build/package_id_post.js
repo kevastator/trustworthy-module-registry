@@ -106,7 +106,9 @@ const handler = async (event, context) => {
         return Err400;
     }
     console.log(body);
-    //const id = body.metadata.ID;
+    if (body.metadata == undefined || body.data == undefined) {
+        return Err400;
+    }
     const Version = body.metadata.Version;
     const Name = body.metadata.Name;
     const metaID = body.metadata.ID;
