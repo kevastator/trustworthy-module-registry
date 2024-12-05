@@ -313,7 +313,7 @@ async function contentExtract(content, dir, Name, debloat) {
     return result;
 }
 async function mainTest() {
-    const result = await urlExtract("https://www.npmjs.com/package/react", "test/zipTest", false);
+    const result = await urlExtract("https://github.com/lquixada/cross-fetch", "test/zipTest", false);
     console.log(result);
     try {
         const body = JSON.parse(result.body);

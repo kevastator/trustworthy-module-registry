@@ -390,7 +390,7 @@ async function contentExtract(content: string, dir: string, Name: string, debloa
 
 async function mainTest()
 {
-    const result: any = await urlExtract("https://www.npmjs.com/package/react", "test/zipTest", false);
+    const result: any = await urlExtract("https://github.com/lquixada/cross-fetch", "test/zipTest", false);
 
     console.log(result);
     

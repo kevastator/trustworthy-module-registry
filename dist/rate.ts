@@ -805,7 +805,7 @@ class License extends Metric {
   // TODO urls with ssh will not work, sometimes happens with npm packages
   private async cloneLicenseFile(repoUrl: string): Promise<string> {
     
-    const dir =`./repo-licenses/${this.repo}`;
+    const dir =`/tmp/repo-licenses/${this.repo}`;
     // Ensure the directory exists
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
@@ -853,7 +853,7 @@ class License extends Metric {
    * only runs if no LICENSE file is found
    */
   private async cloneREADMElicense(): Promise<string> {
-    const dir = `./repo-readmes/${this.repo}`;
+    const dir = `/tmp/repo-readmes/${this.repo}`;
     // Ensure the directory exists
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
