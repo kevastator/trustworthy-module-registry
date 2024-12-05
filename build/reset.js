@@ -8,7 +8,7 @@ const Err401 = {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
-        "Access-Control-Allow-Headers": "Content-Type"
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "You do not have permission to reset the registry."
@@ -22,7 +22,7 @@ const handler = async (event, context) => {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
-            "Access-Control-Allow-Headers": "Content-Type"
+            "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify({
             message: "Registry is reset."
