@@ -64,6 +64,7 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
     
+    console.log(body);
     
     const url = body.URL;
     const content = body.Content;
