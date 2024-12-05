@@ -5,7 +5,10 @@ const s3_repo_1 = require("./s3_repo");
 const Err400 = {
     statusCode: 400,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "There is missing field(s) in the PackageQuery or it is formed improperly, or is invalid."
@@ -14,7 +17,10 @@ const Err400 = {
 const Err413 = {
     statusCode: 413,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Too many packages returned."
@@ -40,7 +46,10 @@ const handler = async (event, context) => {
         const result = {
             statusCode: 200,
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                "Access-Control-Allow-Headers": "Content-Type",
             },
             body: JSON.stringify(foundObjects)
         };
@@ -52,7 +61,10 @@ const handler = async (event, context) => {
     const result = {
         statusCode: 200,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+            "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify(foundObjects)
     };
