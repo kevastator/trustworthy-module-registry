@@ -5,7 +5,10 @@ import { dependencies } from 'webpack';
 const Err400 = {
     statusCode: 400,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."
@@ -15,7 +18,10 @@ const Err400 = {
 const Err404 = {
     statusCode: 404,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Package does not exist."
@@ -51,7 +57,10 @@ export const handler: Handler = async (event, context) => {
     const result = {
         statusCode: 200,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+            "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify(searchResults)
     };

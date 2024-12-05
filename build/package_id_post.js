@@ -39,7 +39,10 @@ const promises_1 = require("timers/promises");
 const Res200 = {
     statusCode: 200,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Version is updated."
@@ -48,7 +51,10 @@ const Res200 = {
 const Err400 = {
     statusCode: 400,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."
@@ -57,7 +63,10 @@ const Err400 = {
 const Err404 = {
     statusCode: 404,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Package does not exist."
@@ -66,7 +75,10 @@ const Err404 = {
 const Err409 = {
     statusCode: 409,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Package exists already."
@@ -75,7 +87,10 @@ const Err409 = {
 const Err424 = {
     statusCode: 424,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Package is not uploaded due to the disqualified rating."
