@@ -613,6 +613,7 @@ export async function getCostByID(packageID: string, rootID: string, dependencie
     else
     {
         const dependencies = rating.Dependencies;
+        const dependency_id: string[] = [];
 
         let totalCost: number = rating.Cost;
 
@@ -639,7 +640,8 @@ export async function getCostByID(packageID: string, rootID: string, dependencie
             if (dep_id != undefined && !(dep_id in returnObj))
             {
                 const costful: any = await getCostByID(dep_id, rootID, true, returnObj);
-
+                
+                dependency_id.push(dep_id);
                 totalCost += costful[dep_id]["totalCost"];
             }
         }
@@ -650,7 +652,7 @@ export async function getCostByID(packageID: string, rootID: string, dependencie
         {
             for (const key in returnObj)
             {
-                if (!(key in dependencies) && key != packageID)
+                if (!(key in dependency_id) && key != packageID)
                 {
                     delete returnObj[key];
                 }

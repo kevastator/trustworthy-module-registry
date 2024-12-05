@@ -504,6 +504,7 @@ async function getCostByID(packageID, rootID, dependencies, returnObj) {
     }
     else {
         const dependencies = rating.Dependencies;
+        const dependency_id = [];
         let totalCost = rating.Cost;
         returnObj[packageID] = {
             standaloneCost: rating.Cost
@@ -521,13 +522,14 @@ async function getCostByID(packageID, rootID, dependencies, returnObj) {
             }
             if (dep_id != undefined && !(dep_id in returnObj)) {
                 const costful = await getCostByID(dep_id, rootID, true, returnObj);
+                dependency_id.push(dep_id);
                 totalCost += costful[dep_id]["totalCost"];
             }
         }
         returnObj[packageID]["totalCost"] = totalCost;
         if (packageID == rootID) {
             for (const key in returnObj) {
-                if (!(key in dependencies) && key != packageID) {
+                if (!(key in dependency_id) && key != packageID) {
                     delete returnObj[key];
                 }
             }
