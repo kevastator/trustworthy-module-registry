@@ -80,6 +80,7 @@ const handler = async (event, context) => {
     catch {
         return Err400;
     }
+    console.log(body);
     const url = body.URL;
     const content = body.Content;
     var debloat = body.debloat;
