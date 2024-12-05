@@ -515,7 +515,10 @@ async function getCostByID(packageID, dependencies, returnObj) {
                     Version: dependencies[key]
                 }
             ]);
-            const dep_id = dep_data[0].ID;
+            let dep_id = undefined;
+            if (dep_data != undefined) {
+                dep_id = dep_data[0].ID;
+            }
             if (dep_id != undefined && !(dep_id in returnObj)) {
                 const costful = await getCostByID(dep_id, true, returnObj);
                 totalCost += costful[dep_id]["totalCost"];
