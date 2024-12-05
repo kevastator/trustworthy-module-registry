@@ -38,6 +38,8 @@ export const handler: Handler = async (event, context) => {
     {
         return Err400;
     }
+
+    console.log(body);
     
     try
     {

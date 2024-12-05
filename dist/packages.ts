@@ -33,7 +33,9 @@ export const handler: Handler = async (event, context) => {
     
     try
     {
-        body = JSON.parse(event.body); 
+        body = JSON.parse(event.body);
+
+        console.log(body);
 
         for (let i = 0; i < body.length; i++)
         {

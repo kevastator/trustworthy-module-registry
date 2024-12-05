@@ -90,6 +90,8 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
 
+    console.log(body);
+
     //const id = body.metadata.ID;
     const Version = body.metadata.Version;
     const Name = body.metadata.Name;
@@ -198,6 +200,8 @@ async function urlExtract(testurl: string, dir: string, Name: string, Version: s
         mkdirSync(dir, { recursive: true });
     }
 
+    var dependencies: any = {};
+
     // Clone the repository
     try
     {
@@ -216,6 +220,15 @@ async function urlExtract(testurl: string, dir: string, Name: string, Version: s
         });
 
         await setTimeout(100);
+
+        const packageData = await readFileSync(dir + "/package.json", "utf-8");
+
+        const packageJson = JSON.parse(packageData);
+
+        if ("dependencies" in packageJson)
+        {
+            dependencies = packageJson.dependencies;
+        }
     }
     catch (err)
     {
@@ -250,6 +263,7 @@ async function urlExtract(testurl: string, dir: string, Name: string, Version: s
     // Send Rating to json
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = false;
+    rating.Dependencies = dependencies;
 
     writeFileSync(dir + ".json", JSON.stringify(rating));
 
@@ -303,10 +317,11 @@ async function contentExtract(content: string, dir: string, Name: string, Versio
     // Rate and Pass
     try
     {
-        const packageData = await readFileSync(dir + "/package.json", "utf-8");
+        const packageData = await readFileSync(dir + "/" + Name + "/package.json", "utf-8");
 
         const packageJson = JSON.parse(packageData);
         let testurl: string = "";
+        var dependencies: any = {};
 
         // Find the Test URL
         if ("homepage" in packageJson)
@@ -328,6 +343,11 @@ async function contentExtract(content: string, dir: string, Name: string, Versio
             }
         }
 
+        if ("dependencies" in packageJson)
+        {
+            dependencies = packageJson.dependencies;
+        }
+
         // Disqualify Based on no URL present
         if (testurl == "")
         {
@@ -345,8 +365,9 @@ async function contentExtract(content: string, dir: string, Name: string, Versio
             return Err424;
         }
     }
-    catch
+    catch (err)
     {
+        console.log(err);
         return Err424;
     }
 
@@ -360,6 +381,7 @@ async function contentExtract(content: string, dir: string, Name: string, Versio
     // Send Rating to json
     rating.Cost = zipBufferd.byteLength / 1000000;
     rating.ByContent = true;
+    rating.Dependencies = dependencies;
 
     writeFileSync(dir + ".json", JSON.stringify(rating));
 

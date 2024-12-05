@@ -674,7 +674,7 @@ async function getPrefixByID(packageID: string)
 
     if (lastUnder == -1)
     {
-        return "";
+        return undefined;
     }
 
     const params: AWS.S3.ListObjectsV2Request = {

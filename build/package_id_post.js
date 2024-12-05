@@ -105,6 +105,7 @@ const handler = async (event, context) => {
     catch {
         return Err400;
     }
+    console.log(body);
     //const id = body.metadata.ID;
     const Version = body.metadata.Version;
     const Name = body.metadata.Name;
@@ -178,6 +179,7 @@ async function urlExtract(testurl, dir, Name, Version, debloat) {
     if (!(0, fs_1.existsSync)(dir)) {
         (0, fs_1.mkdirSync)(dir, { recursive: true });
     }
+    var dependencies = {};
     // Clone the repository
     try {
         if (validURL.indexOf("git") == 0) {
@@ -192,6 +194,11 @@ async function urlExtract(testurl, dir, Name, Version, debloat) {
             depth: 1
         });
         await (0, promises_1.setTimeout)(100);
+        const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
+        const packageJson = JSON.parse(packageData);
+        if ("dependencies" in packageJson) {
+            dependencies = packageJson.dependencies;
+        }
     }
     catch (err) {
         console.log(err);
@@ -215,6 +222,7 @@ async function urlExtract(testurl, dir, Name, Version, debloat) {
     // Send Rating to json
     rating.Cost = zipBuffer.byteLength / 1000000;
     rating.ByContent = false;
+    rating.Dependencies = dependencies;
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // S3 (Version and ID)
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name, Version, debloat);
@@ -255,9 +263,10 @@ async function contentExtract(content, dir, Name, Version, debloat) {
     await (0, promises_1.setTimeout)(100);
     // Rate and Pass
     try {
-        const packageData = await (0, fs_1.readFileSync)(dir + "/package.json", "utf-8");
+        const packageData = await (0, fs_1.readFileSync)(dir + "/" + Name + "/package.json", "utf-8");
         const packageJson = JSON.parse(packageData);
         let testurl = "";
+        var dependencies = {};
         // Find the Test URL
         if ("homepage" in packageJson) {
             testurl = packageJson.homepage;
@@ -271,6 +280,9 @@ async function contentExtract(content, dir, Name, Version, debloat) {
                 testurl = testurl.split(".git")[0];
             }
         }
+        if ("dependencies" in packageJson) {
+            dependencies = packageJson.dependencies;
+        }
         // Disqualify Based on no URL present
         if (testurl == "") {
             return Err424;
@@ -283,7 +295,8 @@ async function contentExtract(content, dir, Name, Version, debloat) {
             return Err424;
         }
     }
-    catch {
+    catch (err) {
+        console.log(err);
         return Err424;
     }
     // Debloat the package if true
@@ -293,6 +306,7 @@ async function contentExtract(content, dir, Name, Version, debloat) {
     // Send Rating to json
     rating.Cost = zipBufferd.byteLength / 1000000;
     rating.ByContent = true;
+    rating.Dependencies = dependencies;
     (0, fs_1.writeFileSync)(dir + ".json", JSON.stringify(rating));
     // UPLOAD TO S3 (Version and ID)
     const id = await (0, s3_repo_1.uploadPackage)(dir, Name, Version, debloat);

@@ -32,6 +32,8 @@ export const handler: Handler = async (event, context) => {
 
     const id = event.pathParameters.id
 
+    console.log(id);
+
     let dep: boolean = false;
 
     if (id ==  undefined)
@@ -44,6 +46,8 @@ export const handler: Handler = async (event, context) => {
     {
         dep = event.queryStringParameters.dependency;
     }
+
+    console.log(dep);
 
     // S3 SEARCH AND RETURN 404 IF NOT FOUND
     const searchResults = await getCostByID(id, id, dep, {});

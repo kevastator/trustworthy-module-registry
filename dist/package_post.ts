@@ -187,6 +187,7 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean)
             return Err400;
         }
 
+        // Add dependencies
         if ("dependencies" in packageJson)
         {
             dependencies = packageJson.dependencies;

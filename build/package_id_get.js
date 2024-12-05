@@ -28,6 +28,7 @@ const Err404 = {
 };
 const handler = async (event, context) => {
     const id = event.pathParameters.id;
+    console.log(id);
     if (id == undefined) {
         return Err400;
     }

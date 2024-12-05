@@ -543,7 +543,7 @@ async function getPrefixByID(packageID) {
     const lastUnder = packageID.lastIndexOf("-");
     const packageName = packageID.slice(0, lastUnder);
     if (lastUnder == -1) {
-        return "";
+        return undefined;
     }
     const params = {
         Bucket: bucketName,

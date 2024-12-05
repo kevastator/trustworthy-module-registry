@@ -34,6 +34,7 @@ const handler = async (event, context) => {
     catch {
         return Err400;
     }
+    console.log(body);
     try {
         var RegEx = RegExp(body.RegEx);
     }
