@@ -863,7 +863,7 @@ export async function getPackagesArray(queries: any[]): Promise<object[]>
 
                         for (let i = 0; i < queries.length; i++)
                         {
-                            if (queries[i].Name == "*" || (testName == queries[i].Name && (testVersion == "" || testVersion == undefined || versionQualifyCheck(queries[i].Version, testVersion))))
+                            if (queries[i].Name == "*" || (testName == queries[i].Name && (queries[i].Version == "" || queries[i].Version == undefined || versionQualifyCheck(queries[i].Version, testVersion))))
                             {
                                 returnArray.push({
                                     Version: testVersion,
@@ -950,6 +950,11 @@ export function checkValidVersion(versionString: string): boolean
 
 export function versionQualifyCheck(versionTester: string, version: string): boolean
 {
+    if (versionTester == undefined || version == undefined)
+    {
+        return false;
+    }
+
     if (versionTester.includes("-"))
     {
         // Check version within range
