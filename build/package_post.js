@@ -39,7 +39,10 @@ const promises_1 = require("timers/promises");
 const Err400 = {
     statusCode: 400,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)"
@@ -48,7 +51,10 @@ const Err400 = {
 const Err409 = {
     statusCode: 409,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Package exists already."
@@ -57,7 +63,10 @@ const Err409 = {
 const Err424 = {
     statusCode: 424,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
     },
     body: JSON.stringify({
         message: "Package is not uploaded due to the disqualified rating."
@@ -194,7 +203,10 @@ async function urlExtract(testurl, dir, debloat) {
     const result = {
         statusCode: 201,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+            "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify({
             metadata: {
@@ -281,7 +293,10 @@ async function contentExtract(content, dir, Name, debloat) {
     const result = {
         statusCode: 201,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+            "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify({
             metadata: {
