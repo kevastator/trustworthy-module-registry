@@ -620,12 +620,12 @@ export async function getCostByID(packageID: string, dependencies: boolean, retu
             standaloneCost: rating.Cost
         };
 
-        for (const [key, value] of dependencies) 
+        for (const key in dependencies) 
         {
             const dep_data: any[] = await getPackagesArray([
                 {
                     Name: key,
-                    Version: value
+                    Version: dependencies[key]
                 }
             ])
 
@@ -641,7 +641,7 @@ export async function getCostByID(packageID: string, dependencies: boolean, retu
 
         returnObj[packageID]["totalCost"] = totalCost;
 
-        for (const [key, value] of returnObj)
+        for (const key in returnObj)
         {
             if (!(key in dependencies))
             {

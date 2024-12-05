@@ -508,11 +508,11 @@ async function getCostByID(packageID, dependencies, returnObj) {
         returnObj[packageID] = {
             standaloneCost: rating.Cost
         };
-        for (const [key, value] of dependencies) {
+        for (const key in dependencies) {
             const dep_data = await getPackagesArray([
                 {
                     Name: key,
-                    Version: value
+                    Version: dependencies[key]
                 }
             ]);
             const dep_id = dep_data[0].ID;
@@ -522,7 +522,7 @@ async function getCostByID(packageID, dependencies, returnObj) {
             }
         }
         returnObj[packageID]["totalCost"] = totalCost;
-        for (const [key, value] of returnObj) {
+        for (const key in returnObj) {
             if (!(key in dependencies)) {
                 delete returnObj[key];
             }
