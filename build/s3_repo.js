@@ -529,7 +529,7 @@ async function getCostByID(packageID, rootID, dependencies, returnObj) {
         returnObj[packageID]["totalCost"] = totalCost;
         if (packageID == rootID) {
             for (const key in returnObj) {
-                if (!(key in dependency_id) && key != packageID) {
+                if (!dependency_id.includes(key) && key != packageID) {
                     delete returnObj[key];
                 }
             }

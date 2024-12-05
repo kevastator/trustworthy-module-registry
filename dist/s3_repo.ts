@@ -652,7 +652,7 @@ export async function getCostByID(packageID: string, rootID: string, dependencie
         {
             for (const key in returnObj)
             {
-                if (!(key in dependency_id) && key != packageID)
+                if (!dependency_id.includes(key) && key != packageID)
                 {
                     delete returnObj[key];
                 }
