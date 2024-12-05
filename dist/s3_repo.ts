@@ -579,7 +579,7 @@ export async function checkIfUploadByContent(packageID: string): Promise<boolean
     return data.ByContent;
 }
 
-export async function getCostByID(packageID: string, dependencies: boolean, returnObj: any)
+export async function getCostByID(packageID: string, rootID: string, dependencies: boolean, returnObj: any)
 {
     const prefix = await getPrefixByID(packageID);
 
@@ -638,7 +638,7 @@ export async function getCostByID(packageID: string, dependencies: boolean, retu
 
             if (dep_id != undefined && !(dep_id in returnObj))
             {
-                const costful: any = await getCostByID(dep_id, true, returnObj);
+                const costful: any = await getCostByID(dep_id, rootID, true, returnObj);
 
                 totalCost += costful[dep_id]["totalCost"];
             }
@@ -646,11 +646,14 @@ export async function getCostByID(packageID: string, dependencies: boolean, retu
 
         returnObj[packageID]["totalCost"] = totalCost;
 
-        for (const key in returnObj)
+        if (packageID == rootID)
         {
-            if (!(key in dependencies) && key != packageID)
+            for (const key in returnObj)
             {
-                delete returnObj[key];
+                if (!(key in dependencies) && key != packageID)
+                {
+                    delete returnObj[key];
+                }
             }
         }
 

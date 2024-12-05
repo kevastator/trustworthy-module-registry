@@ -482,7 +482,7 @@ async function checkIfUploadByContent(packageID) {
     const data = JSON.parse(streamJ?.toString('utf-8'));
     return data.ByContent;
 }
-async function getCostByID(packageID, dependencies, returnObj) {
+async function getCostByID(packageID, rootID, dependencies, returnObj) {
     const prefix = await getPrefixByID(packageID);
     if (prefix == undefined) {
         returnObj[packageID] = undefined;
@@ -520,14 +520,16 @@ async function getCostByID(packageID, dependencies, returnObj) {
                 dep_id = dep_data[0].ID;
             }
             if (dep_id != undefined && !(dep_id in returnObj)) {
-                const costful = await getCostByID(dep_id, true, returnObj);
+                const costful = await getCostByID(dep_id, rootID, true, returnObj);
                 totalCost += costful[dep_id]["totalCost"];
             }
         }
         returnObj[packageID]["totalCost"] = totalCost;
-        for (const key in returnObj) {
-            if (!(key in dependencies) && key != packageID) {
-                delete returnObj[key];
+        if (packageID == rootID) {
+            for (const key in returnObj) {
+                if (!(key in dependencies) && key != packageID) {
+                    delete returnObj[key];
+                }
             }
         }
         return returnObj;
