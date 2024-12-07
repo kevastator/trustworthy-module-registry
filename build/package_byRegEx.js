@@ -27,6 +27,7 @@ const Err404 = {
     })
 };
 const handler = async (event, context) => {
+    // Check if body is JSON
     let body = undefined;
     try {
         body = JSON.parse(event.body);
@@ -34,7 +35,9 @@ const handler = async (event, context) => {
     catch {
         return Err400;
     }
+    // Console log input
     console.log(body);
+    // Try to create a regex object (if invalid return 400)
     try {
         var RegEx = RegExp(body.RegEx);
     }
@@ -47,9 +50,11 @@ const handler = async (event, context) => {
     }
     // Search S3 using the Regex Array
     const foundObjects = await (0, s3_repo_1.getRegexArray)(RegEx);
+    // If there are no objects in the array it's a 404 error!
     if (foundObjects.length == 0) {
         return Err404;
     }
+    // Else return in the proper format
     const result = {
         statusCode: 200,
         headers: {

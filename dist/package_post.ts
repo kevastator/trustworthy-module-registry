@@ -176,25 +176,28 @@ async function urlExtract(testurl: string, dir: string, debloat: boolean, preVer
         const packageJson = JSON.parse(packageData);
 
         // Check if the name and version are properly in the package json file to be uploaded
-        if ("name" in packageJson && "version" in packageJson && !packageJson.name.includes("/") && checkValidVersion(packageJson.version))
+        if ("name" in packageJson && !packageJson.name.includes("/"))
         {
             Name = packageJson.name;
-            version = packageJson.version;
-        }
-        else if ("name" in packageJson && !packageJson.name.includes("/"))
-        {
-            Name = packageJson.name;
-            version = "1.0.0";
         }
         else
         {
             return Err400;
         }
-
+        
+        console.log(preVersion);
         // Set this to the passed version of the body (if it is set)
         if (preVersion != undefined && preVersion != "" && checkValidVersion(preVersion))
         {
             version = preVersion;
+        }
+        else if ("version" in packageJson && checkValidVersion(packageJson.version))
+        {
+            version = packageJson.version;
+        }
+        else
+        {
+            version = "1.0.0";
         }
 
         // Add dependencies

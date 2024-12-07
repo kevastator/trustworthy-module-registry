@@ -27,6 +27,7 @@ const Err404 = {
     })
 };
 const handler = async (event, context) => {
+    // Extract path parameters
     const id = event.pathParameters.id;
     console.log(id);
     if (id == undefined) {
@@ -37,6 +38,7 @@ const handler = async (event, context) => {
     if (searchResults.NetScoreLatency == -1) {
         return Err404;
     }
+    // return and format results
     const result = {
         statusCode: 200,
         headers: {

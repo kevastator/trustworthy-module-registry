@@ -27,6 +27,7 @@ const Err404 = {
     })
 };
 const handler = async (event, context) => {
+    // Get ID from path parameters
     const id = event.pathParameters.id;
     console.log(id);
     let dep = false;
