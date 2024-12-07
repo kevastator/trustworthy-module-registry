@@ -28,6 +28,7 @@ const Err404 = {
 };
 
 export const handler: Handler = async (event, context) => {
+    // Check if body is JSON
     let body = undefined;
     
     try
@@ -39,8 +40,10 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
 
+    // Console log input
     console.log(body);
     
+    // Try to create a regex object (if invalid return 400)
     try
     {
         var RegEx: RegExp = RegExp(body.RegEx);
@@ -60,11 +63,13 @@ export const handler: Handler = async (event, context) => {
     // Search S3 using the Regex Array
     const foundObjects: object[] = await getRegexArray(RegEx);
 
+    // If there are no objects in the array it's a 404 error!
     if (foundObjects.length == 0)
     {
         return Err404;
     }
 
+    // Else return in the proper format
     const result = {
         statusCode: 200,
         headers: {

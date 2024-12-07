@@ -28,6 +28,7 @@ const Err404 = {
 };
 
 export const handler: Handler = async (event, context) => {
+    // Extract path parameters
     const id = event.pathParameters.id
 
     console.log(id);
@@ -45,6 +46,7 @@ export const handler: Handler = async (event, context) => {
         return Err404;
     }
 
+    // return and format results
     const result = {
         statusCode: 200,
         headers: {

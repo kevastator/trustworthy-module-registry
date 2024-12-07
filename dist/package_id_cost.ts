@@ -30,6 +30,7 @@ const Err404 = {
 
 export const handler: Handler = async (event, context) => {
 
+    // Get ID from path parameters
     const id = event.pathParameters.id
 
     console.log(id);

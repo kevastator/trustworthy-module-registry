@@ -29,6 +29,7 @@ const Err404 = {
 
 export const handler: Handler = async (event, context) => {
     
+    // Formatting was fixed in recusive object array return
     const id = event.pathParameters.id
     
     console.log(id);
@@ -41,11 +42,13 @@ export const handler: Handler = async (event, context) => {
     // S3 SEARCH AND RETURN 404 IF NOT FOUND
     const searchResults = await getByID(id);
 
+    // If there is nothing in content there is no object to return in the first place
     if (searchResults.Content == "")
     {
         return Err404;
     }
 
+    // Else if return the response object with the url in the body
     if ("URL" in searchResults)
     {
         const result = {
@@ -71,7 +74,7 @@ export const handler: Handler = async (event, context) => {
 
         return result;
     }
-    else
+    else // Return no url if by content
     {
         const result = {
             statusCode: 200,

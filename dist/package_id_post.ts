@@ -78,6 +78,7 @@ const Err424 = {
 };
 
 export const handler: Handler = async (event, context) => {
+    // Get path paremters and check if body is formatted in correct JSON format
     let body = undefined;
     const ID = event.pathParameters.id
     
@@ -90,9 +91,10 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
 
+    // Log the input body
     console.log(body);
 
-    
+    // Extract proper parameters and return error 400 if there is a formatting error or nonpresent fields
     if (body.metadata == undefined || body.data == undefined)
     {
         return Err400;
@@ -117,6 +119,7 @@ export const handler: Handler = async (event, context) => {
         return Err400;
     }
 
+    // Check if we already have uploaded this version and return error 409 if it already exists
     const versionExistCheck = await checkPrefixExists(Name + delimeter + Version);
 
     if (versionExistCheck)
@@ -124,6 +127,7 @@ export const handler: Handler = async (event, context) => {
         return Err409;
     }
 
+    // Check if the package exists in the first place, return 404 if there is an issue
     const updateFields = await getPrefixParamsByID(ID);
 
     if (updateFields.Version == "")
@@ -131,11 +135,13 @@ export const handler: Handler = async (event, context) => {
         return Err404;
     }
 
+    // Check if the names are equal and this version is greater than the version we are trying to update
     if (updateFields.Name != Name || !versionGreaterThan(Version, updateFields.Version))
     {
         return Err400;
     }
 
+    // Check if this is by content -> if this update does not match the original upload method reject the version upload
     const byContentCheck = await checkIfUploadByContent(ID);
 
     if ((Content == undefined) == byContentCheck)
