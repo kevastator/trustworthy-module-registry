@@ -44,6 +44,7 @@ exports.versionQualifyCheck = versionQualifyCheck;
 const AWS = __importStar(require("aws-sdk"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs = __importStar(require("fs"));
+// CHECK IF ENV VARIABLES ARE PRESENT FOR TESTING ON NON LAMBDA MACHINES
 dotenv_1.default.config();
 if (!process.env.AWS_REGION) {
     console.error(JSON.stringify({ error: "AWS_REGION environment variable is not set" }));
@@ -56,6 +57,7 @@ if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY) {
         region: process.env.AWS_REGION,
     });
 }
+// CONSTANTS
 const s3 = new AWS.S3({
     signatureVersion: 'v4'
 });
@@ -65,19 +67,24 @@ const exampleKey = "MyName" + exports.delimeter + "1.0.0" + exports.delimeter + 
 const maxObReturn = 500;
 async function uploadPackage(dir, name, version, debloat) {
     try {
+        // If we are uploading a debloated zip specifiy the correct path for the debloated zip
         if (debloat) {
             var fileStreamZip = fs.createReadStream(dir + "-debloated.zip");
         }
         else {
             var fileStreamZip = fs.createReadStream(dir + ".zip");
         }
+        // Get the unique id for the uploaded package
         const id = await getUniqueID(name);
+        // Form the file name using the delimeters
         const pathName = name + exports.delimeter + version + exports.delimeter + id;
+        // Form the S3 parameters
         const paramsZip = {
             Bucket: bucketName,
             Key: pathName + exports.delimeter + "zip", // The S3 key (file name) where you want to store the file
             Body: fileStreamZip
         };
+        // Await upload of the zip json and read me (if we are able to)
         const uploadResultZip = await s3.upload(paramsZip).promise();
         const fileStreamJson = fs.createReadStream(dir + ".json");
         const paramsJson = {
@@ -98,6 +105,7 @@ async function uploadPackage(dir, name, version, debloat) {
         catch (err) {
             console.log(err);
         }
+        // Return the id if there is success
         return id;
     }
     catch (err) {
@@ -132,6 +140,7 @@ async function getUniqueID(packageName) {
             break;
         }
     }
+    // Get max number to append to the end of the id to for a unique id for the package
     let max = 0;
     keys.forEach(key => {
         let testNum = Number(key.split(exports.delimeter)[2].replace(packageName + "-", ""));
@@ -142,6 +151,7 @@ async function getUniqueID(packageName) {
     return packageName + "-" + String(max + 1);
 }
 async function checkPrefixExists(packageName) {
+    // Get a query with only 1 max key using the package name
     const params = {
         Bucket: bucketName,
         Prefix: packageName + "/",
@@ -149,6 +159,7 @@ async function checkPrefixExists(packageName) {
     };
     try {
         const data = await s3.listObjectsV2(params).promise();
+        // If there is an object in there the prefix exists (return true!)
         if (data.Contents && data.Contents.length > 0) {
             return true;
         }
@@ -162,6 +173,7 @@ async function checkPrefixExists(packageName) {
     }
 }
 async function reset() {
+    // Form the parameters
     const params = {
         Bucket: bucketName,
     };
@@ -178,12 +190,14 @@ async function reset() {
             }
             const data = await s3.listObjectsV2(params).promise();
             if (data.Contents) {
+                // For each object in here push the key to the delete que
                 data.Contents.forEach((object) => {
                     if (object.Key) {
                         deleteParams.Delete.Objects.push({ Key: object.Key });
                     }
                 });
             }
+            // Delete everything if we are beyond 1000 to empty the que
             if (deleteParams.Delete.Objects.length >= 1000) {
                 await s3.deleteObjects(deleteParams).promise();
                 deleteParams.Delete.Objects = [];
@@ -200,86 +214,7 @@ async function reset() {
     }
 }
 async function getByID(packageID) {
-    // const lastUnder: number = packageID.lastIndexOf("-");
-    // const packageName: string = packageID.slice(0, lastUnder);
-    // if (lastUnder == -1)
-    // {
-    //     return {
-    //         Content: "",
-    //         Name: "",
-    //         ID: "",
-    //         Version: ""
-    //     }
-    // }
-    // const params: AWS.S3.ListObjectsV2Request = {
-    //     Bucket: bucketName,
-    //     Prefix: packageName + "/",
-    // };
-    // let continuationToken: string | undefined = undefined;
-    // let isTruncated = true;  // To check if there are more objects to list
-    // while (isTruncated)
-    // {
-    //     try
-    //     {
-    //         if (continuationToken) {
-    //             params.ContinuationToken = continuationToken;  // Set continuation token for pagination
-    //         }
-    //         // Get object list
-    //         const data = await s3.listObjectsV2(params).promise();
-    //         if (data.Contents)
-    //         {
-    //             for (let object of data.Contents)
-    //             {
-    //                 if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "zip")
-    //                 {
-    //                     // Get the associated object and convert to base64
-    //                     const getObjectCommand: AWS.S3.GetObjectRequest = {
-    //                         Bucket: bucketName,
-    //                         Key: object.Key,
-    //                     };
-    //                     const obData = await s3.getObject(getObjectCommand).promise();
-    //                     const stream = obData.Body 
-    //                     const base64 = stream?.toString('base64');
-    //                     // Check if this needs a URL in it by getting the JSON file
-    //                     const getObjectJsonCommand: AWS.S3.GetObjectRequest = {
-    //                         Bucket: bucketName,
-    //                         Key: object.Key.slice(0, object.Key.lastIndexOf(delimeter)) + delimeter + "json",
-    //                     };
-    //                     const obJData = await s3.getObject(getObjectJsonCommand).promise();
-    //                     const streamJ = obJData.Body 
-    //                     const data = JSON.parse(streamJ?.toString('utf-8')!);
-    //                     // Format our results
-    //                     const result: any =  {
-    //                         Content: base64,
-    //                         Name: packageName,
-    //                         ID: packageID,
-    //                         Version: object.Key?.split(delimeter)[1]
-    //                     }
-    //                     // Add the URL if Needed
-    //                     if (!data.ByContent)
-    //                     {
-    //                         result.URL = data.URL;
-    //                     }
-    //                     // Return Result
-    //                     return result;
-    //                 }
-    //             }
-    //         }
-    //         isTruncated = data.IsTruncated as boolean;
-    //         continuationToken = data.NextContinuationToken;
-    //     }
-    //     catch (err)
-    //     {
-    //         console.log(err);
-    //         break;
-    //     }
-    // }
-    // return {
-    //     Content: "",
-    //     Name: "",
-    //     ID: "",
-    //     Version: ""
-    // }
+    // Get the prefix to call
     const prefix = await getPrefixByID(packageID);
     if (prefix == undefined) {
         return {
@@ -302,6 +237,7 @@ async function getByID(packageID) {
         Bucket: bucketName,
         Key: prefix + exports.delimeter + "json",
     };
+    // Extract more data using the json
     const obJData = await s3.getObject(getObjectJsonCommand).promise();
     const streamJ = obJData.Body;
     const data = JSON.parse(streamJ?.toString('utf-8'));
@@ -314,7 +250,7 @@ async function getByID(packageID) {
         ID: packageID,
         Version: prefix.split(exports.delimeter)[1]
     };
-    // Add the URL if Needed
+    // Add the URL if Needed from the json data
     if (!data.ByContent) {
         result.URL = data.URL;
     }
@@ -322,104 +258,6 @@ async function getByID(packageID) {
     return result;
 }
 async function getRatingByID(packageID) {
-    // const lastUnder: number = packageID.lastIndexOf("-");
-    // const packageName: string = packageID.slice(0, lastUnder);
-    // if (lastUnder == -1)
-    // {
-    //     return {
-    //         BusFactor: undefined,
-    //         BusFactorLatency: undefined,
-    //         Correctness: undefined,
-    //         CorrectnessLatency: undefined,
-    //         RampUp: undefined,
-    //         RampUpLatency: undefined,
-    //         ResponsiveMaintainer: undefined,
-    //         ResponsiveMaintainerLatency: undefined,
-    //         LicenseScore: undefined,
-    //         LicenseScoreLatency: undefined,
-    //         GoodPinningPractice: undefined,
-    //         GoodPinningPracticeLatency: undefined,
-    //         PullRequest: undefined,
-    //         PullRequestLatency: undefined,
-    //         NetScore: undefined,
-    //         NetScoreLatency: -1
-    //     }
-    // }
-    // const params: AWS.S3.ListObjectsV2Request = {
-    //     Bucket: bucketName,
-    //     Prefix: packageName + "/",
-    // };
-    // let continuationToken: string | undefined = undefined;
-    // let isTruncated = true;  // To check if there are more objects to list
-    // while (isTruncated)
-    // {
-    //     try
-    //     {
-    //         if (continuationToken) {
-    //             params.ContinuationToken = continuationToken;  // Set continuation token for pagination
-    //         }
-    //         const data = await s3.listObjectsV2(params).promise();
-    //         if (data.Contents)
-    //         {
-    //             for (let object of data.Contents)
-    //             {
-    //                 if (object.Key?.split(delimeter)[2] == packageID && object.Key?.split(delimeter)[3] == "json")
-    //                 {
-    //                     const getObjectCommand: AWS.S3.GetObjectRequest = {
-    //                         Bucket: bucketName,
-    //                         Key: object.Key,
-    //                     };
-    //                     const obData = await s3.getObject(getObjectCommand).promise();
-    //                     const stream = obData.Body 
-    //                     const rating = JSON.parse(stream?.toString('utf-8')!);
-    //                     return {
-    //                         BusFactor: rating.BusFactor,
-    //                         BusFactorLatency: rating.BusFactor_Latency,
-    //                         Correctness: rating.Correctness,
-    //                         CorrectnessLatency: rating.Correctness_Latency,
-    //                         RampUp: rating.RampUp,
-    //                         RampUpLatency: rating.RampUp_Latency,
-    //                         ResponsiveMaintainer: rating.ResponsiveMaintainer,
-    //                         ResponsiveMaintainerLatency: rating.ResponsiveMaintainer_Latency,
-    //                         LicenseScore: rating.License,
-    //                         LicenseScoreLatency: rating.License_Latency,
-    //                         GoodPinningPractice: rating.FractionalDependency,
-    //                         GoodPinningPracticeLatency: rating.FractionalDependency_Latency,
-    //                         PullRequest: rating.PullRequest,
-    //                         PullRequestLatency: rating.PullRequest_Latency,
-    //                         NetScore: rating.NetScore,
-    //                         NetScoreLatency: rating.NetScore_Latency
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         isTruncated = data.IsTruncated as boolean;
-    //         continuationToken = data.NextContinuationToken;
-    //     }
-    //     catch (err)
-    //     {
-    //         console.log(err);
-    //         break;
-    //     }
-    // }
-    // return {
-    //     BusFactor: undefined,
-    //     BusFactorLatency: undefined,
-    //     Correctness: undefined,
-    //     CorrectnessLatency: undefined,
-    //     RampUp: undefined,
-    //     RampUpLatency: undefined,
-    //     ResponsiveMaintainer: undefined,
-    //     ResponsiveMaintainerLatency: undefined,
-    //     LicenseScore: undefined,
-    //     LicenseScoreLatency: undefined,
-    //     GoodPinningPractice: undefined,
-    //     GoodPinningPracticeLatency: undefined,
-    //     PullRequest: undefined,
-    //     PullRequestLatency: undefined,
-    //     NetScore: undefined,
-    //     NetScoreLatency: -1
-    // }
     const prefix = await getPrefixByID(packageID);
     if (prefix == undefined) {
         return {
