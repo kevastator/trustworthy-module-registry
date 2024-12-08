@@ -38,6 +38,7 @@ exports.getPrefixParamsByID = getPrefixParamsByID;
 exports.getRegexArray = getRegexArray;
 exports.getPackagesArray = getPackagesArray;
 exports.versionGreaterThan = versionGreaterThan;
+exports.versionGreaterThanPatch = versionGreaterThanPatch;
 exports.checkValidVersionRegex = checkValidVersionRegex;
 exports.checkValidVersion = checkValidVersion;
 exports.versionQualifyCheck = versionQualifyCheck;
@@ -550,6 +551,18 @@ function versionGreaterThan(versionG, versionL) {
         return true;
     }
     return false;
+}
+function versionGreaterThanPatch(versionG, versionL) {
+    let versionG1 = Number(versionG.split(".")[0]);
+    let versionG2 = Number(versionG.split(".")[1]);
+    let versionG3 = Number(versionG.split(".")[2]);
+    let versionL1 = Number(versionL.split(".")[0]);
+    let versionL2 = Number(versionL.split(".")[1]);
+    let versionL3 = Number(versionL.split(".")[2]);
+    if (versionG3 <= versionL3 && versionG1 == versionL1 && versionG2 == versionL2) {
+        return false;
+    }
+    return true;
 }
 function checkValidVersionRegex(versionString) {
     const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;

@@ -1,7 +1,7 @@
 import { Handler } from 'aws-lambda';
 import { isValidUrl, processURL, resolveNpmToGithub } from './rate';
 import { debloatPackage } from './debloat';
-import { uploadPackage, checkPrefixExists, checkValidVersion, delimeter, getPrefixParamsByID, versionGreaterThan, checkIfUploadByContent } from './s3_repo';
+import { uploadPackage, checkPrefixExists, checkValidVersion, delimeter, getPrefixParamsByID, versionGreaterThanPatch, checkIfUploadByContent } from './s3_repo';
 import { promises as fs, readFileSync, existsSync, mkdirSync, createWriteStream, writeFile, writeFileSync, createReadStream } from 'fs';
 import archiver from 'archiver'
 import * as unzipper from 'unzipper'
@@ -130,13 +130,13 @@ export const handler: Handler = async (event, context) => {
     // Check if the package exists in the first place, return 404 if there is an issue
     const updateFields = await getPrefixParamsByID(ID);
 
-    if (updateFields.Version == "" || !versionGreaterThan(Version, updateFields.Version))
+    if (updateFields.Version == "")
     {
         return Err404;
     }
 
     // Check if the names are equal and this version is greater than the version we are trying to update
-    if (updateFields.Name != Name)
+    if (updateFields.Name != Name || !versionGreaterThanPatch(Version, updateFields.Version))
     {
         return Err400;
     }

@@ -727,6 +727,24 @@ export function versionGreaterThan(versionG: string, versionL: string): boolean
     return false;
 }
 
+export function versionGreaterThanPatch(versionG: string, versionL: string): boolean
+{
+    let versionG1: Number = Number(versionG.split(".")[0]);
+    let versionG2: Number = Number(versionG.split(".")[1]);
+    let versionG3: Number = Number(versionG.split(".")[2]);
+
+    let versionL1: Number = Number(versionL.split(".")[0]);
+    let versionL2: Number = Number(versionL.split(".")[1]);
+    let versionL3: Number = Number(versionL.split(".")[2]);
+
+    if (versionG3 <= versionL3 && versionG1 == versionL1 && versionG2 == versionL2)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 export function checkValidVersionRegex(versionString: string): boolean
 {
     const versionRegex = /^(?:(\^|\~)?\d+\.\d+\.\d+)(?:-(\d+\.\d+\.\d+))?$/;
