@@ -136,7 +136,7 @@ const handler = async (event, context) => {
         return Err404;
     }
     // Check if the names are equal and this version is greater than the version we are trying to update
-    if (updateFields.Name != Name || !(0, s3_repo_1.versionGreaterThan)(Version, updateFields.Version)) {
+    if (updateFields.Name != Name || !(0, s3_repo_1.versionGreaterThanPatch)(Version, updateFields.Version)) {
         return Err400;
     }
     // Check if this is by content -> if this update does not match the original upload method reject the version upload

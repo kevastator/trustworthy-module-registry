@@ -23,6 +23,15 @@ describe("Version Testing", () => {
     it("Version 1.0.0 should not be greater than 1.0.12", () => {
         expect((0, s3_repo_1.versionGreaterThan)("1.0.0", "1.0.12")).toBe(false);
     });
+    it("Version 1.0.0 should greater than patch 1.3.0", () => {
+        expect((0, s3_repo_1.versionGreaterThanPatch)("1.0.0", "1.3.0")).toBe(true);
+    });
+    it("Version 1.0.0 should not greater than patch 1.0.1", () => {
+        expect((0, s3_repo_1.versionGreaterThanPatch)("1.0.0", "1.0.1")).toBe(false);
+    });
+    it("Version 1.0.2 should greater than patch 1.0.1", () => {
+        expect((0, s3_repo_1.versionGreaterThanPatch)("1.0.2", "1.0.1")).toBe(true);
+    });
     it("Version 1.0.0 should be valid", () => {
         expect((0, s3_repo_1.checkValidVersionRegex)("1.0.0")).toBe(true);
     });
@@ -62,7 +71,7 @@ describe("Version Testing", () => {
     it("Version 12.5.6 should be valid (single version)", () => {
         expect((0, s3_repo_1.checkValidVersion)("12.5.6")).toBe(true);
     });
-    it("Version 3.1.2 should qualify for (3.1.2)", () => {
+    it("Version 3.1.2 should qualify for (3.1.2)versionGreaterThan", () => {
         expect((0, s3_repo_1.versionQualifyCheck)("3.1.2", "3.1.2")).toBe(true);
     });
     it("Version 3.1.2 should qualify for (1.0.0-4.0.0)", () => {
