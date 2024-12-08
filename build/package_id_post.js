@@ -132,11 +132,11 @@ const handler = async (event, context) => {
     }
     // Check if the package exists in the first place, return 404 if there is an issue
     const updateFields = await (0, s3_repo_1.getPrefixParamsByID)(ID);
-    if (updateFields.Version == "") {
+    if (updateFields.Version == "" || !(0, s3_repo_1.versionGreaterThan)(Version, updateFields.Version)) {
         return Err404;
     }
     // Check if the names are equal and this version is greater than the version we are trying to update
-    if (updateFields.Name != Name || !(0, s3_repo_1.versionGreaterThan)(Version, updateFields.Version)) {
+    if (updateFields.Name != Name) {
         return Err400;
     }
     // Check if this is by content -> if this update does not match the original upload method reject the version upload

@@ -130,13 +130,13 @@ export const handler: Handler = async (event, context) => {
     // Check if the package exists in the first place, return 404 if there is an issue
     const updateFields = await getPrefixParamsByID(ID);
 
-    if (updateFields.Version == "")
+    if (updateFields.Version == "" || !versionGreaterThan(Version, updateFields.Version))
     {
         return Err404;
     }
 
     // Check if the names are equal and this version is greater than the version we are trying to update
-    if (updateFields.Name != Name || !versionGreaterThan(Version, updateFields.Version))
+    if (updateFields.Name != Name)
     {
         return Err400;
     }
