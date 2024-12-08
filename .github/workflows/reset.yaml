@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "build/reset.js"
-    branches: [aws-testing]
+      - "build/s3_repo.js"
 
 jobs:
 
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Zip Send
-        run: cp build/reset.js build/index.js && cd build && zip send.zip index.js
+        run: cp build/reset.js build/index.js && cd build && zip send.zip index.js s3_repo.js
       - name: Deploy
         uses: appleboy/lambda-action@v0.2.0
         with:

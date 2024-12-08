@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "build/package_id_del.js"
-    branches: [aws-testing]
 
 jobs:
 

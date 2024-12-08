@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "build/package_id_rate.js"
-    branches: [aws-testing]
+      - "build/s3_repo.js"
 
 jobs:
 
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Zip Send
-        run: cp build/package_id_rate.js build/index.js && cd build && zip send.zip index.js
+        run: cp build/package_id_rate.js build/index.js && cd build && echo "${{ secrets.ENV_FILE }}" > .env && zip send.zip index.js s3_repo.js .env
       - name: Deploy
         uses: appleboy/lambda-action@v0.2.0
         with:
