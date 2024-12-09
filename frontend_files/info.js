@@ -1,141 +1,237 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+const BASE_URL = "https://os0n6b4nh0.execute-api.us-east-2.amazonaws.com/dev";
+// Response Display Helper
+function displayResponse(message, isSuccess) {
+    const responseBox = document.getElementById("responseBox");
+    // Reset styles
+    responseBox.className = "response-box";
+    // Apply success or error style
+    if (isSuccess) {
+        responseBox.classList.add("success");
     }
-};
-var BASE_URL = "https://os0n6b4nh0.execute-api.us-east-2.amazonaws.com/dev";
+    else {
+        responseBox.classList.add("error");
+    }
+    // Set the message
+    responseBox.textContent = message;
+}
+// Drag-and-Drop Logic
+const dragDropZone = document.getElementById("dragDropZone");
+const packageFileInput = document.getElementById("packageFile");
+if (dragDropZone) {
+    dragDropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dragDropZone.classList.add("drag-over"); // Highlight on dragover
+    });
+    dragDropZone.addEventListener("dragleave", () => {
+        dragDropZone.classList.remove("drag-over"); // Remove highlight on dragleave
+    });
+    dragDropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dragDropZone.classList.remove("drag-over");
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (validateZipFile(file)) {
+                packageFileInput.files = files; // Assign the file to the input
+                dragDropZone.classList.add("file-dropped"); // Visual confirmation
+                dragDropZone.innerHTML = `<p>File "${file.name}" is ready for upload.</p>`;
+                displayResponse(`File "${file.name}" is ready for upload.`, true);
+            }
+            else {
+                dragDropZone.classList.add("file-error"); // Error styling
+                displayResponse("Error: Only .zip files are supported.", false);
+            }
+        }
+    });
+    dragDropZone.addEventListener("click", () => packageFileInput.click());
+}
+// Validate file type for drag-and-drop and input selection
+function validateZipFile(file) {
+    return file.type === "application/zip" || file.name.endsWith(".zip");
+}
+// Clear visual confirmation when file input is reset
+packageFileInput.addEventListener("change", () => {
+    const file = packageFileInput.files?.[0];
+    if (file && validateZipFile(file)) {
+        dragDropZone.classList.add("file-dropped");
+        dragDropZone.innerHTML = `<p>File "${file.name}" is ready for upload.</p>`;
+    }
+    else {
+        dragDropZone.classList.remove("file-dropped", "file-error");
+        dragDropZone.innerHTML = `<p>Drag & Drop a file here or click to upload</p>`;
+    }
+});
+// Handle Upload Package Button Click
+const updatePackageButton = document.getElementById("updatePackageButton");
+updatePackageButton.addEventListener("click", async () => {
+    const packageName = document.getElementById("updatePackageName").value.trim();
+    const packageURL = document.getElementById("packageURL").value.trim();
+    const fileInput = packageFileInput.files;
+    if (!packageName) {
+        displayResponse("Error: Package name is required.", false);
+        return;
+    }
+    if (!packageURL && (!fileInput || fileInput.length === 0)) {
+        displayResponse("Error: Provide either a URL or upload a file.", false);
+        return;
+    }
+    if (packageURL && fileInput && fileInput.length > 0) {
+        displayResponse("Error: You cannot upload a file and provide a URL simultaneously.", false);
+        return;
+    }
+    try {
+        const formData = { Name: packageName };
+        if (packageURL) {
+            formData.URL = packageURL;
+        }
+        else if (fileInput && fileInput.length > 0) {
+            const file = fileInput[0];
+            if (!validateZipFile(file)) {
+                displayResponse("Error: Only .zip files are supported.", false);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = async () => {
+                formData.Content = reader.result?.toString().split(",")[1]; // Base64 content
+                await uploadPackage(formData);
+            };
+            reader.readAsDataURL(file);
+            return; // Exit as the FileReader is asynchronous
+        }
+        await uploadPackage(formData);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            displayResponse(`Network error: ${error.message}`, false);
+        }
+        else {
+            displayResponse("An unexpected error occurred during upload.", false);
+        }
+    }
+});
+// Helper Function to Upload the Package
+async function uploadPackage(data) {
+    try {
+        const response = await fetch(`${BASE_URL}/package/${packageID}`, {
+            method: "GET",
+        });
+        if (response.ok) {
+            const tempdata = await response.json();
+            const packageName = tempdata.metadata.Name;
+            const packageId = tempdata.metadata.ID;
+            const packageVersion = tempdata.metadata.Version;
+            const metadata = {
+                Name: packageName,
+                ID: packageId,
+                Version: packageVersion,
+            };
+            const newData = { metadata, data };
+            try {
+                const response = await fetch(`${BASE_URL}/package/${packageID}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newData),
+                });
+                if (response.ok) {
+                    const responseData = await response.json();
+                    displayResponse(`Success: Package uploaded. ID: ${responseData.metadata.ID}`, true);
+                }
+                else {
+                    const errorDetails = await response.json();
+                    switch (response.status) {
+                        case 400:
+                            displayResponse(`Error 400: ${errorDetails.message}`, false);
+                            break;
+                        case 409:
+                            displayResponse(`Error 409: ${errorDetails.message}`, false);
+                            break;
+                        case 424:
+                            displayResponse(`Error 424: ${errorDetails.message}`, false);
+                            break;
+                        default:
+                            displayResponse(`Error ${response.status}: ${errorDetails.message}`, false);
+                            break;
+                    }
+                }
+            }
+            catch (err) {
+                if (err instanceof Error) {
+                    displayResponse(`Network error: ${err.message}`, false);
+                }
+                else {
+                    displayResponse("An unexpected error occurred during upload.", false);
+                }
+            }
+        }
+        else {
+            console.error("Failed to fetch package details:", response.statusText);
+            alert("Failed to load package details.");
+        }
+    }
+    catch (err) {
+        console.error("Error fetching package details:", err);
+        alert("An error occurred while loading the package details.");
+    }
+}
+async function fetchPackageRatings(packageID) {
+    try {
+        const response = await fetch(`${BASE_URL}/package/${packageID}/rate`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch ratings");
+        }
+        const data = await response.json();
+        document.getElementById("busFactor").textContent = data.BusFactor.toString();
+        document.getElementById("correctness").textContent = data.Correctness.toString();
+        document.getElementById("rampUp").textContent = data.RampUp.toString();
+        document.getElementById("responsiveMaintainer").textContent = data.ResponsiveMaintainer.toString();
+        document.getElementById("licenseScore").textContent = data.LicenseScore.toString();
+        document.getElementById("goodPinningPractice").textContent = data.GoodPinningPractice.toString();
+        document.getElementById("pullRequest").textContent = data.PullRequest.toString();
+        document.getElementById("netScore").textContent = data.NetScore.toString();
+    }
+    catch (error) {
+        console.error("Error fetching ratings:", error);
+    }
+}
 /**
  * Retrieves the package ID from the URL query parameters.
  * @returns The package ID as a string or null if not found.
  */
 function getPackageID() {
-    var urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("id");
 }
 /**
  * Fetches and displays the package details.
  * @param packageID - The ID of the package to fetch.
  */
-function loadPackageDetails(packageID) {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, data, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    return [4 /*yield*/, fetch("".concat(BASE_URL, "/package/").concat(packageID), {
-                            method: "GET",
-                        })];
-                case 1:
-                    response = _a.sent();
-                    if (!response.ok) return [3 /*break*/, 3];
-                    return [4 /*yield*/, response.json()];
-                case 2:
-                    data = _a.sent();
-                    console.log("Package details:", data.metadata);
-                    console.log("Package details:", data.metadata.Name);
-                    console.log("Package details:", data.metadata.ID);
-                    console.log("Package details:", data.metadata.Version);
-                    document.getElementById("packageName").textContent = data.metadata.Name || "Unknown";
-                    document.getElementById("packageId").textContent = data.metadata.ID || "Unknown";
-                    document.getElementById("packageVersion").textContent = data.metadata.Version || "Unknown";
-                    return [3 /*break*/, 4];
-                case 3:
-                    console.error("Failed to fetch package details:", response.statusText);
-                    alert("Failed to load package details.");
-                    _a.label = 4;
-                case 4: return [3 /*break*/, 6];
-                case 5:
-                    err_1 = _a.sent();
-                    console.error("Error fetching package details:", err_1);
-                    alert("An error occurred while loading the package details.");
-                    return [3 /*break*/, 6];
-                case 6: return [2 /*return*/];
-            }
+async function loadPackageDetails(packageID) {
+    try {
+        const response = await fetch(`${BASE_URL}/package/${packageID}`, {
+            method: "GET",
         });
-    });
-}
-/**
- * Deletes the package with the given ID.
- * @param packageID - The ID of the package to delete.
- */
-function deletePackage(packageID) {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, errorDetails, err_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    return [4 /*yield*/, fetch("".concat(BASE_URL, "/package/").concat(packageID), {
-                            method: "DELETE",
-                        })];
-                case 1:
-                    response = _a.sent();
-                    if (!response.ok) return [3 /*break*/, 2];
-                    alert("Package successfully deleted.");
-                    window.location.href = "http://ec2-52-200-57-221.compute-1.amazonaws.com/search.html";
-                    return [3 /*break*/, 4];
-                case 2: return [4 /*yield*/, response.json()];
-                case 3:
-                    errorDetails = _a.sent();
-                    alert("Error ".concat(response.status, ": ").concat(errorDetails.message));
-                    _a.label = 4;
-                case 4: return [3 /*break*/, 6];
-                case 5:
-                    err_2 = _a.sent();
-                    console.error("Error deleting package:", err_2);
-                    alert("An error occurred while deleting the package.");
-                    return [3 /*break*/, 6];
-                case 6: return [2 /*return*/];
-            }
-        });
-    });
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById("packageName").textContent = data.metadata.Name || "Unknown";
+            document.getElementById("packageId").textContent = data.metadata.ID || "Unknown";
+            document.getElementById("packageVersion").textContent = data.metadata.Version || "Unknown";
+        }
+        else {
+            console.error("Failed to fetch package details:", response.statusText);
+            alert("Failed to load package details.");
+        }
+    }
+    catch (err) {
+        console.error("Error fetching package details:", err);
+        alert("An error occurred while loading the package details.");
+    }
 }
 // Main Execution
-var packageID = getPackageID();
+const packageID = getPackageID();
 if (packageID) {
     loadPackageDetails(packageID);
-    var confirmDeleteButton = document.getElementById("confirmDeleteButton");
-    if (confirmDeleteButton) {
-        confirmDeleteButton.addEventListener("click", function () {
-            deletePackage(packageID);
-        });
-    }
-    else {
-        console.error("Confirm delete button not found.");
-    }
+    fetchPackageRatings(packageID);
 }
 else {
     alert("No package ID provided.");
