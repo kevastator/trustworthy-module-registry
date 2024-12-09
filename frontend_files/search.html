@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="cloudfare.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="http://ec2-52-200-57-221.compute-1.amazonaws.com">Package Registry</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="http://ec2-52-200-57-221.compute-1.amazonaws.com">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="http://ec2-52-200-57-221.compute-1.amazonaws.com/contact.html">Contact</a></li>
+                <li class="nav-item"><a class="nav-link" href="http://ec2-52-200-57-221.compute-1.amazonaws.com/search.html">Search</a></li>
+                <li class="nav-item"><a class="nav-link" href="http://ec2-52-200-57-221.compute-1.amazonaws.com/admin.html">Database Management</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <h1 class="text-center">Search Results</h1>
+
+        <!-- Search Form at the Top -->
+        <div class="search-bar">
+            <form id="searchForm" action="http://ec2-52-200-57-221.compute-1.amazonaws.com/search.html" method="GET" label="searchForm" class="d-flex">
+                <input id="searchName" type="text" name="name" class="form-control mr-2" label="packageNameInput" placeholder="Package Name">
+                <input id="searchVersion" type="text" name="version" class="form-control mr-2" label="versionInput" placeholder="Version">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="mt-4">
+            <p class="text-center text-muted">Loading results...</p>
+        </div>
+        <div id="paginationContainer" class="d-flex justify-content-center mt-4"></div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white text-center py-3">
+        <div class="container">
+            <p>&copy; 2024 Package Registry. All rights reserved.</p>
+            <p><a href="http://ec2-52-200-57-221.compute-1.amazonaws.com/contact.html" class="text-white">Contact Us</a></p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="search.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
