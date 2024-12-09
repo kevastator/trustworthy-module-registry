@@ -33,8 +33,6 @@
                 <p><strong>ID:</strong> <span id="packageId"></span></p>
                 <p><strong>Version:</strong> <span id="packageVersion"></span></p>
             </div>
-            <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Package</button>
-            
             <h2 class="text-center mb-4">Package Ratings</h2>
             <div id="ratings" class="ratings-info">
                 <p><strong>Bus Factor:</strong> <span id="busFactor">N/A</span></p>
@@ -46,28 +44,40 @@
                 <p><strong>Pull Request:</strong> <span id="pullRequest">N/A</span></p>
                 <p><strong>Net Score:</strong> <span id="netScore">N/A</span></p>
             </div>
+            <section class="upload-section">
+                <h2 class="text-center">Update Package</h2>
+                <p class="text-center text-muted">Provide a package name and either a file or a URL.</p>
+                <form id="uploadForm" class="upload-form" label="uploadForm">
+                    <div class="form-group">
+                        <label for="packageName">Package Name</label>
+                        <input type="text" class="form-control" id="updatePackageName" placeholder="Enter package name" required>
+                    </div>
+            
+                    <div class="separator text-center my-3">
+                        <span class="text-muted">Choose One</span>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="packageURL">Package URL</label>
+                        <input type="url" class="form-control" id="packageURL" placeholder="Enter package URL">
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="dragDropZone">Package File</label>
+                        <div id="dragDropZone" class="drag-drop-zone">
+                            <p>Drag & Drop a file here or click to upload</p>
+                            <input type="file" id="packageFile" class="file-input" label="dropZone" accept=".zip,.json,.tar.gz">
+                        </div>
+                    </div>
+            
+                    <button type="button" class="btn btn-primary btn-block" id="updatePackageButton">Update Package</button>
+                </form>
+            </section>
+            
+            <div id="responseBox" class="response-box mt-3"></div>
+
         </div>
-    
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel">Confirm Package Deletion</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete this package? This action cannot be undone.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmDeleteButton">Yes, Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
     <!-- Footer -->
     <footer class="footer bg-dark text-white text-center py-3">
